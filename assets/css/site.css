@@ -1,0 +1,1052 @@
+/* ============================================================================
+   MSquare (수학문제연구회) · KAIST
+   "The Plane and the Curve" — the M² wordmark is one unbroken parametric curve,
+   so the site is the plane that curve lives in.
+
+   MOTIF BUDGET — there are exactly three mathematical objects on this site:
+     1. the triangular lattice + its k-nearest-neighbour graph  (hero, Our Works, contact)
+     2. the real axis, to scale, with a declared break          (history)
+     3. K5 / the pentagram                                      (departments)
+   Plus the M² curve itself. Do not add a fourth.
+
+   TEXTURE / FIGURE LAW
+     TEXTURE = the lattice dots only, at --lattice. Never raised.
+     FIGURE  = k-NN edges, the axis, the pentagram, the covers, the M².
+               Drawn at full legibility. Never faded "for subtlety."
+   ========================================================================= */
+
+/* ---------------------------------------------------------------- tokens */
+:root {
+  color-scheme: light dark;
+
+  /* UI layer — carries all text. Contrast ratios verified against --bg. */
+  --bg:            #FBFAFC;   /* paper, faintly violet-tinted. Never pure white. */
+  --surface:       #FFFFFF;
+  --text:          #141A3D;   /* 16.21:1 */
+  --muted:         #565C7E;   /*  6.25:1 — AA at any size */
+  --accent:        #7C1FD4;   /*  6.72:1; #FFF on it = 6.99:1 */
+  --accent-alt:    #B01BC8;   /*  5.26:1 */
+  --on-accent:     #FFFFFF;
+  --border:        #E4E1EC;   /*  1.24:1 — decorative hairlines ONLY, never meaning */
+  --border-strong: #8E86A6;   /*  3.30:1 — meets SC 1.4.11 for interactive edges */
+
+  /* Geometry layer — the 2018 brand violets, verbatim. Decorative only: these
+     fail text contrast (#b636ff = 4.07:1) and must never carry type. Declared
+     once, never themed — SVG reads them directly, so no JS retheme. */
+  --ink-1: #b636ff;
+  --ink-2: #d92cf9;
+  --ink-3: #9f00ff;
+  --lattice:  rgba(20, 26, 61, .13);
+  --geo-line: rgba(124, 31, 212, .22);
+  --glow-a:   9%;    /* light needs far less: violet on near-white reads hot fast */
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Segoe UI", "Malgun Gothic", "맑은 고딕", sans-serif;
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;   /* Latin only */
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono",
+               "Cascadia Mono", Consolas, "Pretendard Variable", monospace;
+
+  --step--2: .75rem;
+  --step--1: .875rem;
+  --step-0:  clamp(1rem, .95rem + .25vw, 1.125rem);
+  --step-1:  clamp(1.25rem, 1.15rem + .5vw, 1.5rem);
+  --step-2:  clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --step-3:  clamp(2rem, 1.6rem + 2vw, 3rem);
+  --step-4:  clamp(2.25rem, 1.6rem + 3.2vw, 4.5rem);
+
+  --container: min(100% - 2.5rem, 72rem);
+  --container-wide: min(100% - 2.5rem, 90rem);
+
+  --dur-1: 180ms;
+  --dur-2: 320ms;
+  --dur-3: 640ms;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+
+  --tl-year: 84px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:            #0B0C1B;   /* navy-black, derived from the brand #1f2c6c */
+    --surface:       #13152B;
+    --text:          #ECEBF4;   /* 16.40:1 */
+    --muted:         #9EA1BE;   /*  7.66:1 */
+    --accent:        #C88BFF;   /*  7.94:1 */
+    --accent-alt:    #EE7BFA;   /*  8.17:1 */
+    --on-accent:     #0B0C1B;
+    --border:        #282B47;
+    --border-strong: #616690;   /*  3.52:1 */
+    --lattice:  rgba(236, 235, 244, .16);
+    --geo-line: rgba(200, 139, 255, .26);
+    --glow-a:   22%;
+  }
+}
+/* The manual toggle must beat the media query in both directions. */
+:root[data-theme="dark"] {
+  --bg:            #0B0C1B;
+  --surface:       #13152B;
+  --text:          #ECEBF4;
+  --muted:         #9EA1BE;
+  --accent:        #C88BFF;
+  --accent-alt:    #EE7BFA;
+  --on-accent:     #0B0C1B;
+  --border:        #282B47;
+  --border-strong: #616690;
+  --lattice:  rgba(236, 235, 244, .16);
+  --geo-line: rgba(200, 139, 255, .26);
+  --glow-a:   22%;
+}
+
+/* ------------------------------------------------------------------ base */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  font-weight: 400;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Korean must never break mid-word; keep-all is the whole game. */
+:lang(ko), .ko {
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+:lang(en) { line-height: 1.65; }
+
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+
+h1, h2, h3 {
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.012em;   /* never past -.02em: Hangul closes its counters */
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection { background: var(--accent); color: var(--on-accent); }
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: .18em;
+  text-transform: uppercase;   /* .mono only — never on a Korean-bearing element */
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.4;
+}
+.mono--ko { text-transform: none; letter-spacing: .08em; }
+
+.num { font-variant-numeric: lining-nums tabular-nums; }
+
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -100%;
+  z-index: 100;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: .75rem 1.25rem;
+  border-radius: 2px;
+  transition: top var(--dur-1);
+}
+.skip:focus { top: 1rem; }
+
+/* --------------------------------------------------------------- layout */
+.wrap { width: var(--container); margin-inline: auto; }
+.wrap--wide { width: var(--container-wide); margin-inline: auto; }
+
+section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
+
+/* The 2018 site centred all ten headings — the single biggest template tell.
+   Everything here is left-aligned. There is no text-center. */
+.head { margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+.head::before {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 1px;
+  background: var(--accent);
+  margin-bottom: 1.25rem;
+}
+.head__eyebrow { color: var(--muted); margin-bottom: .75rem; }
+.head__ko { font-size: var(--step-3); }
+.head__en {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--step-3);
+  color: var(--muted);
+  line-height: 1.15;
+}
+
+/* ------------------------------------------------------------------ nav */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-2);
+  background: var(--bg);   /* fallback where backdrop-filter is unsupported */
+}
+/* The blur MUST live on a pseudo-element, never on .nav itself.
+   An element carrying a backdrop-filter becomes the containing block for its
+   position:fixed descendants (CSS Filter Effects §2.1). .nav__nav — the mobile
+   menu — is a fixed child of .nav, so putting the filter on .nav resolves its
+   inset:4.25rem 0 0 0 against the 68px nav bar instead of the viewport and
+   collapses the whole menu to a 64px strip with every link clipped out of it.
+   ::before has no fixed descendants, so it blurs without hijacking anything. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .nav { background: transparent; }
+  .nav::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: color-mix(in oklab, var(--bg) 72%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(14px) saturate(1.4);
+  }
+}
+.nav.is-stuck { border-bottom-color: var(--border); }
+
+.nav__in {
+  width: var(--container);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.25rem;
+}
+.nav__brand {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+.nav__list {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+}
+.nav__link {
+  display: block;
+  padding-block: .75rem;   /* 44px target */
+  text-decoration: none;
+  color: var(--muted);
+  position: relative;
+  transition: color var(--dur-1);
+}
+.nav__link::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: .35rem;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-2) var(--ease-out);
+}
+.nav__link:hover, .nav__link:focus-visible { color: var(--text); }
+.nav__link.is-active { color: var(--text); }
+.nav__link.is-active::after { transform: scaleX(1); }
+
+.nav__tools { display: flex; align-items: center; gap: .5rem; }
+
+.tgl {
+  width: 44px; height: 44px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color var(--dur-1), border-color var(--dur-1);
+}
+.tgl:hover { color: var(--text); border-color: var(--border); }
+.tgl svg { width: 18px; height: 18px; }
+.tgl__sun { display: none; }
+:root[data-theme="dark"] .tgl__sun { display: block; }
+:root[data-theme="dark"] .tgl__moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tgl__sun { display: block; }
+  :root:not([data-theme="light"]) .tgl__moon { display: none; }
+}
+
+/* The mobile trigger is the word MENU, not a hamburger. */
+.nav__burger {
+  display: none;
+  background: none;
+  border: 0;
+  color: var(--text);
+  cursor: pointer;
+  padding: .75rem .25rem;
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .nav__burger { display: block; }
+  .nav__nav {
+    position: fixed;
+    inset: 4.25rem 0 0 0;
+    background: var(--surface);
+    padding: 2rem 1.25rem;
+    transform: translateY(-8px);
+    opacity: 0;
+    /* opacity+pointer-events hide it from the eye and the mouse but NOT from
+       the tab order: without visibility:hidden a keyboard user tabs through 7
+       invisible links, focus ring and all. visibility is still transitionable. */
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--dur-2), transform var(--dur-2), visibility var(--dur-2);
+    overflow-y: auto;
+  }
+  .nav__nav.is-open { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+  .nav__list { flex-direction: column; align-items: stretch; gap: 0; }
+  .nav__link {
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: var(--step-1);
+    font-family: var(--font-mono);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .nav__link::after { display: none; }
+
+  /* JS off: the MENU trigger is inert, so the panel it would open must not be
+     the only way to navigate. Degrade to a plain wrapped link list under the
+     brand, and drop the dead trigger. */
+  .no-js .nav { position: static; }
+  .no-js .nav__burger { display: none; }
+  .no-js .nav__in { flex-wrap: wrap; }
+  .no-js .nav__nav {
+    position: static;
+    inset: auto;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+    padding: 0 0 .75rem;
+    background: none;
+    overflow: visible;
+    flex-basis: 100%;
+  }
+  .no-js .nav__list { flex-direction: row; flex-wrap: wrap; gap: 0 1.25rem; }
+  .no-js .nav__link {
+    border-bottom: 0;
+    padding-block: .5rem;
+    font-size: var(--step--2);
+  }
+}
+
+/* Both controls exist only to be scripted. Dark mode still resolves correctly
+   through prefers-color-scheme without JS, so hiding the toggle loses nothing;
+   showing a control that cannot respond is worse than not showing it. */
+.no-js .tgl,
+.no-js .top { display: none; }
+
+/* ----------------------------------------------------------------- hero */
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(560px, 100svh, 900px);
+  display: grid;
+  align-items: center;
+  padding-block: clamp(7rem, 12vh, 9rem) clamp(4rem, 8vh, 6rem);
+  /* Not a cheap full-bleed gradient: a localized pool sitting BEHIND the curve
+     (which lives at ~68% across), fading out before it reaches any viewport
+     edge. The lattice on top is what gives the pool structure. Widen this and
+     it stops being a pool and becomes a wash — which is the template look. */
+  background:
+    radial-gradient(ellipse 45% 55% at 68% 50%,
+      color-mix(in oklab, var(--ink-1) var(--glow-a), transparent), transparent 72%),
+    var(--bg);
+}
+
+.hero-geo {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  /* The radial mask is what stops the lattice ending in a hard rectangle. */
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 30%, transparent 78%);
+          mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 30%, transparent 78%);
+}
+
+/* the k-NN constellation: FIGURE, drawn at full legibility — never faded */
+.knn__ball  { fill: none; stroke: var(--ink-1); stroke-opacity: .35; stroke-width: 1; }
+.knn__spoke { stroke: var(--ink-2); stroke-width: 1; opacity: .55; }
+.knn__nb    { fill: var(--ink-2); }
+
+.hero__inner {
+  width: var(--container);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 900px) {
+  .hero__inner { grid-template-columns: 1fr; gap: 2.5rem; }
+  .hero__mark { order: -1; justify-self: start; }
+}
+
+.hero__eyebrow { color: var(--muted); margin-bottom: 1.25rem; }
+.hero__h1 { font-size: var(--step-4); margin-bottom: .75rem; }
+.hero__en {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--step-1);
+  color: var(--muted);
+  line-height: 1.3;
+  margin-bottom: 1.75rem;
+}
+
+/* The set-builder restates the club's own admission policy — 수학실력과는 무관하니
+   수학을 좋아하는 학생분들이라면 모두 환영합니다 — as a formula whose predicate is
+   *loves*, not *is good at*. Genuine math, not decorative TeX. */
+.hero__tex {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: .5rem;
+  display: block;
+}
+.hero__tex i { font-style: italic; }
+.hero__tex sup { font-size: .6em; vertical-align: super; line-height: 0; }
+.hero__tex .op { color: var(--muted); padding-inline: .15em; }
+.hero__gloss { font-size: var(--step-1); color: var(--text); }
+
+/* A child of .hero, not .hero__inner: .hero__inner is only as tall as its
+   content, so anchoring here would land the cue on top of the gloss line. */
+.hero__scroll {
+  position: absolute;
+  left: max(1.25rem, calc((100% - 72rem) / 2));
+  bottom: clamp(1.5rem, 4vh, 2.5rem);
+  z-index: 1;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: 0;
+}
+.hero__scroll::after {
+  content: "";
+  width: 40px;
+  height: 1px;
+  background: var(--border-strong);
+}
+@media (max-width: 900px) { .hero__scroll { display: none; } }
+
+/* ------------------------------------------------- the M² mark (the curve)
+   FHD_logo.png is a verified perfect alpha mask: transparent ground (corner
+   a=0), pure opaque black ink, clean antialiased edges. So the glyph outline
+   IS the PNG's alpha channel — nothing is traced, nothing is inverted, and one
+   asset serves both themes at any size and any colour.
+
+   Ink bbox measured from the alpha channel: x 78–1194, y 297–1016 (1116×719).
+   Padding is asymmetric, so mask-size:contain would render it visibly
+   off-centre. The inner box is the full 1395² PNG positioned so the ink bbox
+   lands exactly on .m2 — hence the percentages below. Do not "simplify" them. */
+.m2 {
+  position: relative;
+  aspect-ratio: 1116 / 719;
+  width: min(46vw, 30rem);
+}
+@media (max-width: 900px) { .m2 { width: min(62vw, 20rem); } }
+
+.m2__glow, .m2__ink { position: absolute; inset: 0; }
+
+/* The filter MUST live on the ancestor, never on the masked element. An element
+   carrying both filter and mask is rendered *then* masked — the bloom outside
+   the glyph is clipped away and the glow silently does not exist. */
+.m2__glow { filter: drop-shadow(0 8px 24px rgba(124, 31, 212, .18)); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .m2__glow {
+    filter: drop-shadow(0 0 28px color-mix(in oklab, var(--ink-1) 45%, transparent));
+  }
+}
+:root[data-theme="dark"] .m2__glow {
+  filter: drop-shadow(0 0 28px color-mix(in oklab, var(--ink-1) 45%, transparent));
+}
+
+.m2__ink {
+  width:  125%;         /* 1395/1116 */
+  height: 194.0195%;    /* 1395/719  */
+  left:   -6.9892%;     /*  -78/1116 */
+  top:    -41.3074%;    /* -297/719  */
+  overflow: hidden;
+  -webkit-mask: url(../images/about/FHD_logo.png) 0 0 / 100% 100% no-repeat;
+          mask: url(../images/about/FHD_logo.png) 0 0 / 100% 100% no-repeat;
+}
+.m2__ink svg { width: 100%; height: 100%; }
+
+/* Wet ink catching the light — the ONLY ambient motion on the entire site. */
+.m2__spec {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg,
+    transparent 40%,
+    color-mix(in oklab, #fff 55%, transparent) 50%,
+    transparent 60%);
+  mix-blend-mode: overlay;
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+/* Exactly one ambient motion on the page: the hero mark only. The nav, about
+   and footer marks carry the element but never animate it. */
+.js .hero .m2__spec { animation: spec 9s var(--ease-in-out) 1.4s infinite; }
+@keyframes spec {
+  0%   { transform: translateX(-100%); }
+  22%  { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* The mark arrives once, on load. No traced centreline: the resting state is
+   always exactly right, which is the whole point of the mask technique. */
+.js .m2 { opacity: 0; animation: markIn 1100ms var(--ease-out) 150ms forwards; }
+@keyframes markIn {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------------------------------------------------------------- about */
+.about__grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 3rem;
+}
+@media (max-width: 900px) { .about__grid { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+.about__ko {
+  font-size: var(--step-1);
+  max-width: 38em;   /* em-based: stays ~38 Hangul at any size, self-correcting */
+}
+.about__rule { height: 1px; background: var(--border); margin-block: 2rem; }
+.about__label { color: var(--muted); margin-bottom: .75rem; }
+.about__en {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--muted);
+  max-width: 66ch;
+}
+.about__side {
+  border-left: 1px solid var(--border);
+  padding-left: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2rem;
+}
+@media (max-width: 900px) { .about__side { border-left: 0; padding-left: 0; } }
+.about__side .m2 { width: 120px; }
+.js .about__side .m2 { opacity: 1; animation: none; }
+
+.social { display: flex; gap: .25rem; list-style: none; padding: 0; }
+.social a {
+  width: 44px; height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  transition: color var(--dur-1), border-color var(--dur-1);
+}
+.social a:hover, .social a:focus-visible { color: var(--accent); border-color: var(--border); }
+.social svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* -------------------------------------------------- history: the real axis
+   The 2018 timeline spaced 1988 and 2024 equally. That is a lie. Vertical
+   position is proportional to elapsed time. The 24-year quiet stretch is not
+   hidden — it is DECLARED as an axis break, a real scientific convention, and
+   the break is content. Add an event by setting --y to its year. That is all. */
+/* <ol> for real document semantics, but the axis IS the ordering — the markers
+   would render as a second, competing numbering. */
+.tl { position: relative; list-style: none; padding: 0; margin: 0; }
+
+.tl__seg { position: relative; padding-left: 4.5rem; }
+@media (max-width: 900px) { .tl__seg { padding-left: 2.75rem; } }
+
+.tl__axis {
+  position: absolute;
+  left: 1.5rem;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: var(--border-strong);
+}
+@media (max-width: 900px) { .tl__axis { left: .35rem; } }
+
+.tl-a { height: 120px; }
+.tl-b { height: calc(14 * var(--tl-year)); }
+
+/* the declared break */
+.tl-break {
+  height: 180px;
+  position: relative;
+  padding-left: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .35rem;
+}
+@media (max-width: 900px) { .tl-break { padding-left: 2.75rem; } }
+.tl-break__glyph {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  translate: -50% -50%;
+  width: 18px; height: 34px;
+}
+@media (max-width: 900px) { .tl-break__glyph { left: .35rem; } }
+.tl-break__glyph::before, .tl-break__glyph::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: var(--border-strong);
+  rotate: -20deg;
+}
+.tl-break__glyph::before { top: 12px; }
+.tl-break__glyph::after  { top: 22px; }
+/* the axis is genuinely absent across the break */
+.tl-break::before {
+  content: "";
+  position: absolute;
+  left: 1.5rem;
+  top: 8px; bottom: 8px;
+  width: 3px;
+  translate: -1px 0;
+  background: var(--bg);
+}
+@media (max-width: 900px) { .tl-break::before { left: .35rem; } }
+/* No opacity here. Compositing --muted at .75 drops this 12px caption from its
+   verified 6.25:1 to 3.55:1 and fails AA — opacity silently invalidates every
+   contrast ratio the token comments promise. If it must recede, change the
+   colour, never the alpha. */
+.tl-break__txt { color: var(--muted); }
+
+.tl-item { position: relative; }
+/* COLLISION BUDGET — read before touching --tl-year or card content.
+   Cards are absolutely positioned by year, so the tightest consecutive pair
+   sets the minimum pitch. The two layouts have DIFFERENT tightest pairs:
+
+     desktop (>900px, sides alternate): tightest SAME-side pair is 2023→2025
+                                        = 2 yr = 168px  vs card <=150px. OK.
+     mobile  (<=900px, one column):     alternation is gone, so 2023→2024 and
+                                        2024→2025 = 1 yr = 104px  vs card.
+
+   That is why mobile raises the pitch AND drops the description: a full card
+   at a 1-year pitch overlaps its neighbour outright. */
+.tl-b .tl-item {
+  position: absolute;
+  top: calc((var(--y) - 2012) * var(--tl-year));
+  max-height: 150px;
+  overflow: hidden;
+}
+.tl-item__node {
+  position: absolute;
+  left: -3.05rem;
+  top: .55rem;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 4px var(--bg);   /* punches a hole in the axis rule */
+}
+@media (max-width: 900px) { .tl-item__node { left: -2.5rem; } }
+.tl-item__yr { color: var(--accent); margin-bottom: .35rem; }
+.tl-item__ko { font-size: var(--step-2); margin-bottom: .25rem; }
+.tl-item__en { font-family: var(--font-display); font-style: italic; color: var(--muted); font-size: var(--step--1); margin-bottom: .35rem; }
+.tl-item__desc { color: var(--muted); font-size: var(--step--1); line-height: 1.7; }
+
+/* desktop alternates sides — that is what buys the 2023/24/25 cluster its room */
+@media (min-width: 901px) {
+  .tl__seg { padding-left: 0; }
+  .tl__axis { left: 50%; }
+  .tl-break { padding-left: 0; }
+  .tl-break__glyph, .tl-break::before { left: 50%; }
+  .tl-break__txt { padding-left: calc(50% + 2.5rem); }
+  .tl-a .tl-item, .tl-b .tl-item { width: calc(50% - 2.5rem); }
+  .tl-item[data-side="l"] { left: 0; text-align: right; }
+  .tl-item[data-side="r"] { left: calc(50% + 2.5rem); }
+  .tl-item[data-side="l"] .tl-item__node { left: auto; right: -2.95rem; }
+  .tl-item[data-side="r"] .tl-item__node { left: -3.05rem; }
+  .tl-a .tl-item { width: 100%; text-align: center; }
+  .tl-a .tl-item__node { left: 50%; translate: -50% 0; }
+}
+
+/* One column below 900px: the 2023/2024/2025 cluster sits at a 1-year pitch,
+   which leaves no room for the description line. The year, the event and its
+   English gloss are load-bearing; the description is not. */
+@media (max-width: 900px) {
+  :root { --tl-year: 104px; }
+  .tl-item__desc { display: none; }
+  .tl-b .tl-item { max-height: 92px; }
+}
+/* At 320px the longest title (Jane Street 스폰서십 체결) wraps to two lines and
+   overruns the cap, which would silently clip it. Raise both, together. */
+@media (max-width: 380px) {
+  :root { --tl-year: 132px; }
+  .tl-b .tl-item { max-height: 118px; }
+}
+
+/* The 2014–2023 entry is an INTERVAL, so it is drawn as one. This bracket is
+   also what fills the long stretch the to-scale axis necessarily opens up
+   between 2013 and 2023: that space is not empty, it is a nine-year run, and
+   the bracket has to be legible enough to say so. It is FIGURE, not texture. */
+.tl-bracket {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  top: calc((2014 - 2012) * var(--tl-year));
+  height: calc(9 * var(--tl-year));
+  width: 9px;
+  border: 2px solid var(--accent);
+  border-left: 0;
+  border-radius: 0 3px 3px 0;
+  opacity: .75;
+}
+@media (max-width: 900px) {
+  .tl-bracket { left: .35rem; }
+}
+
+.tl-now {
+  position: absolute;
+  top: calc(14 * var(--tl-year));
+  left: 50%;
+  translate: -50% 0;
+  color: var(--muted);
+  background: var(--bg);
+  padding-block: .25rem;
+}
+@media (max-width: 900px) { .tl-now { left: .35rem; translate: -20% 0; } }
+
+/* ----------------------------------------------------------- activities */
+/* gap:1px over a --border background IS the hairline system — no double
+   borders, no border-collapse, no orphan hairline at the edges. */
+.acts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.acts > * { min-width: 0; }
+.act {
+  background: var(--bg);
+  aspect-ratio: 1 / 1;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+  transition: transform var(--dur-2) var(--ease-out), background var(--dur-2);
+}
+.act:hover, .act:focus-within { transform: translateY(-3px); }
+.act__i { color: var(--muted); }
+.act__ko { font-size: var(--step-2); }
+.act__desc {
+  color: var(--muted);
+  font-size: var(--step--1);
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height var(--dur-2) var(--ease-out), opacity var(--dur-2);
+}
+.act:hover .act__desc, .act:focus-within .act__desc { max-height: 5rem; opacity: 1; }
+/* Mandatory: on the 2018 site every description was permanently unreachable on
+   touch — which is most of this audience. */
+@media (hover: none) {
+  .act__desc { max-height: none; opacity: 1; }
+}
+@media (max-width: 1023px) { .acts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .acts { grid-template-columns: 1fr; }
+  .act { aspect-ratio: auto; min-height: 140px; }
+}
+
+/* ------------------------------------------------------------ our works */
+.works { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
+.works > * { min-width: 0; }
+@media (max-width: 768px) { .works { grid-template-columns: 1fr; } }
+
+/* A real <a>, never onclick on a <div>: keyboard, middle-click, focus ring. */
+.work {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  text-decoration: none;
+  overflow: hidden;
+  transition: transform var(--dur-2) var(--ease-out), border-color var(--dur-2);
+}
+.work:hover, .work:focus-visible { transform: translateY(-4px); border-color: var(--accent); }
+.work__cover {
+  aspect-ratio: 4 / 3;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.work__cover .cv { width: 100%; height: 100%; }
+.work__body { padding: 1.5rem; display: flex; flex-direction: column; gap: .4rem; }
+.work__tag { color: var(--muted); }
+.work__ko { font-size: var(--step-2); }
+.work__en { font-family: var(--font-display); font-style: italic; color: var(--muted); }
+.work__go { color: var(--accent); margin-top: .5rem; }
+.work:hover .work__go { text-decoration: underline; }
+
+/* All three covers are the same lattice/k-NN system at three different k.
+   One motif, three states, three meanings. */
+.cv__edges line { stroke: var(--geo-line); stroke-width: 1; }
+.cv__dots circle { fill: var(--lattice); }
+
+/* --------------------------------------------------------- departments */
+.dept__head { display: flex; align-items: center; gap: 3rem; flex-wrap: wrap; }
+.k5 { width: 12rem; height: 12rem; flex: none; }
+.k5__edge { stroke: var(--geo-line); stroke-width: 1; transition: stroke var(--dur-2), stroke-width var(--dur-2); }
+.k5__edge.is-lit { stroke: var(--accent); stroke-width: 1.75; }
+.k5__v { fill: var(--accent); transition: r var(--dur-2); cursor: pointer; }
+.k5__v.is-lit { r: 7; }
+@media (max-width: 640px) { .k5 { width: 8rem; height: 8rem; } }
+
+/* Five never grids well — 3+2 leaves an orphan row. Two layouts, one
+   breakpoint, no orphan row ever. */
+.depts { list-style: none; padding: 0; }
+
+@media (min-width: 1120px) {
+  .depts {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .depts > * { min-width: 0; }
+  .dept {
+    background: var(--bg);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    min-height: 12rem;
+  }
+}
+/* < 1120px — the roster. Reads like a masthead, stacks perfectly. Never 3+2. */
+@media (max-width: 1119px) {
+  .dept {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .depts .dept:last-child { border-bottom: 1px solid var(--border); }
+}
+.dept__i { color: var(--muted); }
+.dept__ko { font-size: var(--step-2); }
+.dept__en { font-family: var(--font-display); font-style: italic; color: var(--muted); font-size: var(--step--1); }
+.dept__lead { color: var(--accent); }
+.dept.is-lit { background: color-mix(in oklab, var(--accent) 7%, var(--bg)); }
+
+/* ------------------------------------------------------------- partners */
+.partners {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.partners > * { min-width: 0; }
+@media (max-width: 640px) { .partners { grid-template-columns: 1fr; } }
+.partner {
+  background: var(--surface);
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 2rem;
+  text-decoration: none;
+}
+@media (max-width: 640px) { .partner { aspect-ratio: 21 / 9; } }
+.partner__logo { flex: 1; display: grid; place-items: center; width: 100%; }
+.partner img {
+  max-height: 44px;
+  width: auto;
+  opacity: .55;
+  filter: grayscale(1);
+  transition: opacity var(--dur-1), filter var(--dur-1);
+}
+.partner:hover img, .partner:focus-visible img { opacity: 1; filter: none; }
+.partner__cap { color: var(--muted); overflow-wrap: anywhere; }
+
+/* All three marks are dark-ink-on-transparent and would vanish on the dark
+   ground. brightness(0) crushes every opaque pixel to black regardless of
+   source hue (preserving alpha), then invert(1) lifts them to ONE uniform
+   white. grayscale(1)+invert(1) would instead map different hues to different
+   whites — a luminance spread, the opposite of the one-ink look. Dark hover
+   raises opacity only: filter:none there would make Jane Street disappear. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .partner img { opacity: .6; filter: brightness(0) invert(1); }
+  :root:not([data-theme="light"]) .partner:hover img,
+  :root:not([data-theme="light"]) .partner:focus-visible img { opacity: 1; filter: brightness(0) invert(1); }
+}
+:root[data-theme="dark"] .partner img { opacity: .6; filter: brightness(0) invert(1); }
+:root[data-theme="dark"] .partner:hover img,
+:root[data-theme="dark"] .partner:focus-visible img { opacity: 1; filter: brightness(0) invert(1); }
+
+/* -------------------------------------------------------------- contact */
+.contact { position: relative; overflow: hidden; }
+.contact__geo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  width: 100%; height: 100%;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 70% 50%, #000 20%, transparent 75%);
+          mask-image: radial-gradient(ellipse 70% 80% at 70% 50%, #000 20%, transparent 75%);
+}
+.contact > .wrap { position: relative; z-index: 1; }
+.contact__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+@media (max-width: 768px) { .contact__grid { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+.actions { display: flex; flex-direction: column; }
+.action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem .75rem;
+  border-top: 1px solid var(--border);
+  text-decoration: none;
+  transition: background var(--dur-1);
+}
+.actions .action:last-child { border-bottom: 1px solid var(--border); }
+.action:hover, .action:focus-visible { background: color-mix(in oklab, var(--accent) 8%, transparent); }
+.action__go { color: var(--accent); transition: transform var(--dur-1); }
+.action:hover .action__go { transform: translateX(4px); }
+
+.dl { display: grid; grid-template-columns: auto 1fr; gap: 0; }
+.dl dt, .dl dd {
+  padding-block: 1rem;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+.dl dt { color: var(--muted); padding-right: 1.5rem; white-space: nowrap; }
+.dl dd { text-align: right; overflow-wrap: anywhere; }
+.dl dd a { color: var(--text); text-decoration-color: var(--border-strong); text-underline-offset: 3px; }
+.dl dd a:hover { color: var(--accent); }
+.contact__social { margin-top: 2rem; }
+
+/* --------------------------------------------------------------- footer */
+.foot { border-top: 1px solid var(--border); padding-block: 3rem 2.5rem; position: relative; }
+.foot__in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.foot__brand { display: flex; align-items: center; gap: .75rem; }
+.foot__brand .m2 { width: 28px; }
+.js .foot__brand .m2 { opacity: 1; animation: none; }
+.foot__txt { color: var(--muted); }
+.nav__brand .m2 { width: 28px; }
+.js .nav__brand .m2 { opacity: 1; animation: none; }
+
+.top {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 40;
+  width: 44px; height: 44px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;   /* or it stays in the tab order while invisible */
+  pointer-events: none;
+  transition: opacity var(--dur-2), visibility var(--dur-2), color var(--dur-1), border-color var(--dur-1);
+}
+.top.is-on { opacity: 1; visibility: visible; pointer-events: auto; }
+.top:hover { color: var(--accent); border-color: var(--accent); }
+
+/* --------------------------------------------------------------- motion */
+/* Content is never hidden behind a script that might not run: .reveal is
+   visible by default, and only the .js class (set inline in <head>) hides it. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(12px);   /* 12px, not 40px — large travel is the template */
+  transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+.js .reveal.in-view { opacity: 1; transform: none; }
+
+.js .hero-geo { animation: heroPar linear both; }
+@keyframes heroPar { to { transform: translate3d(0, -25%, 0); opacity: 0; } }
+@supports (animation-timeline: scroll()) {
+  .js .hero-geo { animation-timeline: scroll(root); animation-range: 0 60vh; }
+}
+/* Firefox has no scroll-driven CSS: site.js drives --sy and this takes over. */
+@supports not (animation-timeline: scroll()) {
+  .js .hero-geo {
+    animation: none;
+    transform: translate3d(0, calc(var(--sy, 0) * -.25px), 0);
+    opacity: var(--hero-o, 1);
+  }
+}
+
+/* Reduced motion removes the JOURNEY, never the DESTINATION. It must produce
+   the finished page, not an empty one. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .js .m2 { opacity: 1 !important; animation: none !important; }
+  .m2__spec { display: none !important; }
+  .js .hero-geo { animation: none !important; transform: none !important; opacity: 1 !important; }
+  .js .reveal { opacity: 1 !important; transform: none !important; }
+  .act__desc { max-height: none !important; opacity: 1 !important; }
+}

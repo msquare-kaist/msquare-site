@@ -5,12 +5,19 @@ KAIST 수학문제연구회 (MSquare) 홈페이지 · <https://www.msquare.or.kr
 정적 사이트입니다. **빌드 과정이 없습니다.** `index.html`을 고치고 push하면 GitHub Pages가 바로 배포합니다.
 
 ```
-index.html          페이지 전체 (여기만 고치면 됩니다)
-assets/css/site.css 스타일 전부
-assets/js/site.js   동작 전부 (전부 "있으면 좋은 것" — 없어도 페이지는 완전합니다)
-tools/gen_geo.py    Our Works 표지와 K5 오각형 SVG 생성기 (평소엔 실행할 일 없음)
-CNAME               커스텀 도메인
+index.html               메인 페이지
+departments/*.html       부서별 페이지 5개
+assets/css/site.css      스타일 전부
+assets/js/site.js        동작 전부 (전부 "있으면 좋은 것" — 없어도 페이지는 완전합니다)
+assets/video/*.webm|png  부서별 manim 애니메이션 + 포스터 (미리 렌더된 결과물)
+tools/gen_geo.py         Our Works 표지 · K5 오각형 SVG 생성기
+tools/manim_scenes.py    부서별 애니메이션 장면
+tools/render_videos.py   위 장면들을 webm으로 렌더
+CNAME                    커스텀 도메인
 ```
+
+`tools/`는 **전부 미리 돌려놓은 것**입니다. 사이트 자체는 파이썬을 쓰지 않고,
+방문자 브라우저에서 manim이 도는 일도 없습니다. 그림을 다시 만들고 싶을 때만 실행하세요.
 
 ## 로컬에서 보기
 
@@ -25,10 +32,29 @@ python -m http.server 8000
 
 | 무엇 | 어디 |
 |---|---|
+| **부서 소개 글** (아직 비어 있음) | `departments/*.html` — `.dintro` 문단 **5개 페이지 모두** |
 | 회장 / 부회장 이메일 | `index.html` — `연락` 섹션의 `<dl class="dl">` |
-| 부서장 이름 | `index.html` — `<li class="dept" data-dept="N">` 안의 `.dept__lead` |
+| 부서장 이름 | `index.html`의 `.dept__lead`, 그리고 해당 `departments/*.html`의 `.dhero__lead` |
 | 신청 폼 링크 (ML / KAI-Square) | `index.html` — `발간 · 자료` 섹션과 `연락` 섹션 (두 군데 모두) |
-| 저작권 | `index.html` — `<footer>` |
+| 저작권 | `index.html` + `departments/*.html`의 `<footer>` |
+
+## 한국어 / 영어
+
+한 페이지에 **두 언어가 다 들어 있습니다.** CSS가 `<html data-lang>`을 보고 한쪽만 보여줍니다.
+
+```html
+<p class="dintro" data-tr="ko" lang="ko">한국어 문장</p>
+<p class="dintro" data-tr="en" lang="en">English sentence</p>
+```
+
+**글을 고칠 때는 항상 두 개를 같이 고쳐주세요.** 하나만 고치면 다른 언어에서 옛날 문장이 그대로 나옵니다.
+
+- 새 문장을 넣을 때도 `data-tr="ko"` / `data-tr="en"` 짝을 맞춰 넣으세요.
+- `aria-label` 같은 **속성 안에는 절대 넣지 마세요.** 속성은 글자만 담을 수 있어서
+  태그를 넣으면 따옴표가 깨지고 페이지에 이상한 글자가 튀어나옵니다.
+  번역이 필요한 이름은 `class="vh"` (화면에 안 보이는) 요소에 넣고 `aria-labelledby`로 가리키세요.
+- 첫 방문자는 브라우저 언어로 자동 선택되고, 한 번 고르면 그 선택이 기억됩니다.
+- JS가 꺼져 있으면 두 언어가 다 보입니다 (플래그를 바꿀 방법이 없으니 아무것도 숨기지 않습니다).
 
 ### 연혁에 항목 추가하기
 
@@ -45,6 +71,22 @@ python -m http.server 8000
 1989–2011 구간은 의도적으로 **축척 생략(axis break)** 처리되어 있습니다. 비어 있는 게 아니라,
 "기록이 없는 24년"을 숨기지 않고 드러낸 것입니다.
 
+## 부서 페이지 · 애니메이션
+
+부서 페이지마다 manim 애니메이션이 하나씩 있습니다. 전부 **미리 렌더해서 `assets/video/`에
+넣어둔 것**이라, 사이트는 그냥 `.webm` 파일 하나를 틀 뿐입니다.
+
+```bash
+pip install manim                  # ffmpeg + LaTeX 필요
+python tools/render_videos.py      # 전부 다시 렌더
+python tools/render_videos.py ml   # 하나만
+```
+
+- 장면을 고치려면 `tools/manim_scenes.py`. 색은 `site.css`의 토큰과 맞춰져 있으니 같이 바꿔주세요.
+- `preload="none"`이라 화면에 보이기 전까지는 영상 데이터를 아예 받지 않습니다.
+- 모션 최소화 설정을 켠 사람에게는 자동재생하지 않고, 포스터 이미지와 재생 버튼만 보여줍니다.
+- 포스터(`*.png`)는 영상 끝부분 프레임입니다 — 정지 화면에서도 완성된 그림이 보이도록.
+
 ## 건드리기 전에 알아둘 것
 
 - **M² 로고는 이미지가 아니라 CSS 마스크입니다.** `FHD_logo.png`의 알파 채널을 마스크로 쓰고
@@ -55,8 +97,14 @@ python -m http.server 8000
 - **`.nav`에 `backdrop-filter`를 직접 걸지 마세요.** `backdrop-filter`가 걸린 요소는
   `position:fixed` 자식의 기준 박스가 되어버려서 모바일 메뉴가 64px로 찌그러집니다.
   그래서 블러는 `.nav::before`에 있습니다.
-- **수학 모티프는 딱 3개입니다**: 삼각격자 + k-NN 그래프, 실수 축, K5(오각형). 그리고 M² 곡선.
-  네 번째를 추가하지 마세요 — `site.css` 맨 위 주석 참고.
+- **메인 페이지의 수학 모티프는 딱 3개입니다**: 삼각격자 + k-NN 그래프, 실수 축, K5(오각형).
+  그리고 M² 곡선. 네 번째를 추가하지 마세요 — `site.css` 맨 위 주석 참고.
+  (부서 페이지 애니메이션은 별개 지면이라 이 예산에 포함되지 않습니다.)
+- **연혁 카드 높이는 언어마다 다릅니다.** 영어 제목이 한국어보다 길어서, 영어일 때는
+  `--tl-year`(1년당 픽셀)를 더 크게 잡습니다. 축척은 "칸이 균일한가"가 지키는 것이지
+  "상수가 같은가"가 지키는 게 아닙니다. `site.css`의 `COLLISION BUDGET` 주석 참고.
+- **Newsreader는 라틴 전용 폰트입니다.** 한글에 적용하면 한글이 없는 세리프로 떨어져서 깨집니다.
+  한글에는 절대 쓰지 마세요 (`.work__desc[data-tr="en"]`처럼 영어 노드에만).
 - **브랜드 보라색(`--ink-*`)은 장식 전용입니다.** 대비가 모자라서 글자에 쓰면 안 됩니다.
   글자는 `--text` / `--muted` / `--accent`만.
 - `opacity`로 글자를 흐리게 하지 마세요. 검증된 대비값이 조용히 깨집니다.

@@ -1,0 +1,7 @@
+# manim's scratch tree: partial movie files, caches and intermediate renders.
+# Only the finished assets/video/*.webm and *.png are committed.
+tools/.manim/
+
+# Python
+__pycache__/
+*.pyc

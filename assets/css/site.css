@@ -65,6 +65,12 @@
 
   --tl-year: 84px;
 }
+/* Measured natural card heights: Korean tops out at ~110px, English at ~172px
+   ("Public release of KAI-Square" vs "카이스퀘어 대외 발행"). The axis stays
+   honest as long as the pitch is UNIFORM — the constant may differ per language,
+   the proportionality may not. So English gets a taller year rather than a
+   clipped card. Must come after :root to win (same specificity). */
+[data-lang="en"] { --tl-year: 96px; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -155,6 +161,30 @@ h1, h2, h3 {
 .mono--ko { text-transform: none; letter-spacing: .08em; }
 
 .num { font-variant-numeric: lining-nums tabular-nums; }
+
+/* ---------------------------------------------------------------- i18n
+   Every translatable node ships TWICE — data-tr="ko" and data-tr="en" — and CSS
+   shows exactly one. No JS is needed to render a language: the pre-paint script
+   in <head> only stamps the flag, so there is never a frame of the wrong one,
+   and a crawler sees real markup in both languages.
+
+   The .no-js rule must come LAST: it has the same specificity as the two rules
+   above it, so source order is what lets it win. With no JS the flag can never
+   change, so both languages are shown rather than stranding half the audience. */
+[data-lang="ko"] [data-tr="en"],
+[data-lang="en"] [data-tr="ko"] { display: none; }
+.no-js [data-tr] { display: revert; }
+
+/* Screen-reader-only. Used for accessible names that must be translated —
+   aria-label cannot hold a KO/EN pair because it is plain text, not markup. */
+.vh {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 .skip {
   position: absolute;
@@ -289,6 +319,8 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 }
 .tgl:hover { color: var(--text); border-color: var(--border); }
 .tgl svg { width: 18px; height: 18px; }
+.tgl--lang { width: auto; min-width: 44px; padding-inline: .5rem; font-weight: 600; }
+.tgl--lang .mono { letter-spacing: .08em; }
 .tgl__sun { display: none; }
 :root[data-theme="dark"] .tgl__sun { display: block; }
 :root[data-theme="dark"] .tgl__moon { display: none; }
@@ -423,6 +455,10 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 
 .hero__eyebrow { color: var(--muted); margin-bottom: 1.25rem; }
 .hero__h1 { font-size: var(--step-4); margin-bottom: .75rem; }
+/* 수학문제연구회 is 7 glyphs and lands on one line; "Mathematical Problem Solving
+   Group" is four words and would run to three lines at the same size, swamping
+   the hero. Same role, different metrics — so the English gets its own scale. */
+[data-lang="en"] .hero__h1 { font-size: clamp(2rem, 1.15rem + 2.7vw, 3.4rem); }
 .hero__en {
   font-family: var(--font-display);
   font-style: italic;
@@ -671,9 +707,10 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 .tl-b .tl-item {
   position: absolute;
   top: calc((var(--y) - 2012) * var(--tl-year));
-  max-height: 150px;
+  max-height: 150px;    /* desktop KO: tightest same-side pair is 2yr = 168px */
   overflow: hidden;
 }
+[data-lang="en"] .tl-b .tl-item { max-height: 180px; }   /* 2yr = 192px here */
 .tl-item__node {
   position: absolute;
   left: -3.05rem;
@@ -711,14 +748,18 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
    English gloss are load-bearing; the description is not. */
 @media (max-width: 900px) {
   :root { --tl-year: 104px; }
+  [data-lang="en"] { --tl-year: 124px; }
   .tl-item__desc { display: none; }
   .tl-b .tl-item { max-height: 92px; }
+  [data-lang="en"] .tl-b .tl-item { max-height: 112px; }
 }
 /* At 320px the longest title (Jane Street 스폰서십 체결) wraps to two lines and
    overruns the cap, which would silently clip it. Raise both, together. */
 @media (max-width: 380px) {
   :root { --tl-year: 132px; }
+  [data-lang="en"] { --tl-year: 140px; }
   .tl-b .tl-item { max-height: 118px; }
+  [data-lang="en"] .tl-b .tl-item { max-height: 126px; }
 }
 
 /* The 2014–2023 entry is an INTERVAL, so it is drawn as one. This bracket is
@@ -824,7 +865,10 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 .work__body { padding: 1.5rem; display: flex; flex-direction: column; gap: .4rem; }
 .work__tag { color: var(--muted); }
 .work__ko { font-size: var(--step-2); }
-.work__en { font-family: var(--font-display); font-style: italic; color: var(--muted); }
+.work__desc { color: var(--muted); }
+/* Newsreader is Latin-only: applying it to the Korean node would fall all the
+   way through to a system serif with no Hangul. Serif italic on the EN node only. */
+.work__desc[data-tr="en"] { font-family: var(--font-display); font-style: italic; }
 .work__go { color: var(--accent); margin-top: .5rem; }
 .work:hover .work__go { text-decoration: underline; }
 
@@ -1050,3 +1094,72 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   .js .reveal { opacity: 1 !important; transform: none !important; }
   .act__desc { max-height: none !important; opacity: 1 !important; }
 }
+
+
+/* ===================================================== department subpages */
+.dhero {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(7rem, 14vh, 10rem) clamp(3rem, 6vh, 4rem);
+  background:
+    radial-gradient(ellipse 50% 60% at 78% 50%,
+      color-mix(in oklab, var(--ink-1) var(--glow-a), transparent), transparent 72%),
+    var(--bg);
+}
+.dhero__in { position: relative; z-index: 1; }
+.dback {
+  display: inline-block;
+  color: var(--muted);
+  text-decoration: none;
+  margin-bottom: 2rem;
+  padding-block: .5rem;
+}
+.dback:hover, .dback:focus-visible { color: var(--accent); }
+.dhero__i { color: var(--muted); margin-bottom: .75rem; }
+.dhero__h1 { font-size: var(--step-4); margin-bottom: .75rem; }
+.dhero__lead { color: var(--accent); }
+
+.dbody { padding-block: clamp(3rem, 7vw, 5rem) clamp(5rem, 10vw, 9rem); }
+.dgrid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 3rem;
+  align-items: start;
+}
+@media (max-width: 900px) { .dgrid { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+.dintro { font-size: var(--step-1); max-width: 38em; margin-bottom: 2rem; }
+
+.dside { min-width: 0; }
+.dfig { margin: 0; position: relative; }
+.dvid {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #0B0C1B;   /* the scenes are rendered on this exact ground */
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+.dfig__cap { color: var(--muted); margin-top: .875rem; }
+
+.sibs { margin-top: clamp(4rem, 8vw, 6rem); border-top: 1px solid var(--border); padding-top: 2rem; }
+.sibs__t { color: var(--muted); margin-bottom: 1rem; }
+.sibs__row { display: flex; flex-wrap: wrap; gap: .5rem; }
+.sib {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: .75rem 1rem;
+  text-decoration: none;
+  font-weight: 800;
+  transition: border-color var(--dur-1), color var(--dur-1);
+}
+.sib:hover, .sib:focus-visible { border-color: var(--accent); color: var(--accent); }
+
+.dept__more {
+  color: var(--accent);
+  text-decoration: none;
+  margin-top: auto;
+  padding-block: .5rem;
+  display: inline-block;
+}
+.dept__more:hover, .dept__more:focus-visible { text-decoration: underline; }

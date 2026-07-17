@@ -31,12 +31,20 @@
   }
   /* The markup can only hard-code ONE label, so it is wrong for every visitor
      whose page resolves to dark — via the OS or via the persisted choice the
-     inline <head> script stamps. Derive it from the theme actually rendered. */
+     inline <head> script stamps. Derive it from the theme actually rendered.
+     It must track the LANGUAGE too: the SVG is decorative, so this label is the
+     button's only accessible name, and a Korean string is unreadable to the
+     English audience the toggle exists for. */
   function syncLabel() {
     if (!toggle) return;
     var dark = isDark();
-    toggle.setAttribute('aria-label', dark ? '밝은 테마로 전환' : '어두운 테마로 전환');
+    var ko = root.dataset.lang !== 'en';
+    toggle.setAttribute('aria-label',
+      ko ? (dark ? '밝은 테마로 전환' : '어두운 테마로 전환')
+         : (dark ? 'Switch to light theme' : 'Switch to dark theme'));
     toggle.setAttribute('aria-pressed', String(dark));
+    // the name is now language-dependent, so declare which language it is in
+    toggle.setAttribute('lang', ko ? 'ko' : 'en');
   }
   if (toggle) {
     syncLabel();
@@ -49,6 +57,31 @@
     // Keep the label honest when the OS flips and no manual choice is stored.
     OSDark.addEventListener('change', function () {
       if (!root.dataset.theme) syncLabel();
+    });
+  }
+
+  /* --------------------------------------------------------- 1b. language */
+  /* CSS already renders exactly one language from <html data-lang>, which the
+     pre-paint script stamps. This only flips the flag and remembers it. */
+  var langBtn = $('#lang-toggle');
+  function syncLang() {
+    var ko = root.dataset.lang !== 'en';
+    root.lang = ko ? 'ko' : 'en';
+    if (langBtn) {
+      // The label names the language you are switching TO, so it is written in
+      // that language — and must declare it, or a screen reader reads Korean
+      // with an English voice.
+      langBtn.setAttribute('aria-label', ko ? 'Switch to English' : '한국어로 보기');
+      langBtn.setAttribute('lang', ko ? 'en' : 'ko');
+    }
+    syncLabel();   // the theme button's name is language-dependent too
+  }
+  syncLang();
+  if (langBtn) {
+    langBtn.addEventListener('click', function () {
+      root.dataset.lang = root.dataset.lang === 'en' ? 'ko' : 'en';
+      try { localStorage.setItem('m2-lang', root.dataset.lang); } catch (e) {}
+      syncLang();
     });
   }
 
@@ -210,11 +243,40 @@
       });
     }, { passive: true });
 
-    var heroEl = $('.hero');
+    var heroEl = $('.hero') || $('.dhero');   // department pages use .dhero
     if (heroEl) {
       heroEl.addEventListener('pointerleave', function () { knnG.innerHTML = ''; });
     }
   }
+
+  /* --------------------------------------- 4b. department scene playback */
+  /* preload="none": not a byte of video is fetched until playback is wanted, so
+     the poster is the whole cost until then.
+
+     The markup ships `controls` because that is the correct state when nothing
+     else runs — with JS off it is the only way to reach the animation. We keep
+     the controls even while autoplaying: WCAG 2.2.2 wants a pause mechanism for
+     anything that auto-starts and moves for more than five seconds, and these
+     loop. Under reduced motion we simply never autoplay; the poster is already
+     the finished frame, so the still page loses nothing. */
+  var vidCtl = $$('.dvid').map(function (v) {
+    var io = null;
+    function play() { v.play().catch(function () {}); }
+    function start() {
+      if (RM.matches || io) return;
+      if (!('IntersectionObserver' in window)) { play(); return; }
+      io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) play(); else v.pause(); });
+      }, { threshold: .25 });
+      io.observe(v);
+    }
+    function stop() {
+      if (io) { io.disconnect(); io = null; }
+      v.pause();
+    }
+    start();
+    return { start: start, stop: stop };
+  });
 
   /* --------------------------------------------- 5. hero parallax fallback */
   /* Firefox has no scroll-driven CSS; without this it gets a dead hero. */
@@ -245,11 +307,18 @@
     root.style.removeProperty('--hero-o');
   }
   startParallax();
-  // Honour a LIVE change, not just the state at load. CSS cannot stop a JS
-  // timer, and a listener that keeps firing burns battery invisibly.
+  // Honour a LIVE change, not just the state at load. Someone who starts to feel
+  // unwell and flips the OS switch must have the motion stop NOW — including a
+  // video that is already looping, which CSS cannot reach at all.
   RM.addEventListener('change', function (e) {
-    if (e.matches) { stopParallax(); reveals.forEach(function (el) { el.classList.add('in-view'); }); }
-    else startParallax();
+    if (e.matches) {
+      stopParallax();
+      reveals.forEach(function (el) { el.classList.add('in-view'); });
+      vidCtl.forEach(function (c) { c.stop(); });
+    } else {
+      startParallax();
+      vidCtl.forEach(function (c) { c.start(); });
+    }
   });
 
   /* ------------------------- 6. departments: K5 <-> roster cross-highlight */

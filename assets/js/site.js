@@ -172,6 +172,30 @@
     reveals.forEach(function (el) { rio.observe(el); });
   }
 
+  /* ---------------------------------------------------- 3b. hero + timeline
+     The hero copy cascades in on load; freeze the final state after so a later
+     language toggle (which swaps display:none nodes) can't replay it. */
+  var heroSec = $('.hero');
+  if (heroSec) setTimeout(function () { heroSec.classList.add('hero--shown'); }, 1200);
+
+  /* The to-scale history axis draws itself in as each segment enters. Under
+     reduced motion (or no IO) it is simply stamped drawn — the finished axis. */
+  var tlSegs = $$('.tl__seg');
+  if (tlSegs.length) {
+    if (RM.matches || !('IntersectionObserver' in window)) {
+      tlSegs.forEach(function (el) { el.classList.add('is-drawn'); });
+    } else {
+      var tio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('is-drawn');
+          tio.unobserve(e.target);   // one-shot: scroll-back never re-draws
+        });
+      }, { threshold: 0, rootMargin: '0px 0px -15% 0px' });
+      tlSegs.forEach(function (el) { tio.observe(el); });
+    }
+  }
+
   /* ------------------------------------------- 4. the lattice and its k-NN */
   var A = 36;                       // lattice constant
   var DY = A * Math.sqrt(3) / 2;    // true triangular row pitch — not a square grid

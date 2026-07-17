@@ -61,6 +61,7 @@
   --dur-2: 320ms;
   --dur-3: 640ms;
   --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);   /* ~6% back-out; node pop only */
   --ease-in-out: cubic-bezier(.65, 0, .35, 1);
 
   --tl-year: 84px;
@@ -112,6 +113,22 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
   -webkit-text-size-adjust: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+/* a scrollbar that belongs to the palette, re-theming for free (Move 6) */
+@supports selector(::-webkit-scrollbar) {
+  html { scrollbar-width: auto; }
+  ::-webkit-scrollbar { width: 12px; height: 12px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 99px;
+    border: 3px solid var(--bg);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover  { background: var(--muted); }
+  ::-webkit-scrollbar-thumb:active { background: var(--accent); }
 }
 
 body {
@@ -217,7 +234,12 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   margin-bottom: 1.25rem;
 }
 .head__eyebrow { color: var(--muted); margin-bottom: .75rem; }
-.head__ko { font-size: var(--step-3); }
+/* the 2rem accent tick draws in a beat after the heading rises (Move 8) */
+.js .head::before { transform: scaleX(0); transform-origin: left; transition: transform var(--dur-3) var(--ease-out) 140ms; }
+.js .head.in-view::before { transform: scaleX(1); }
+.head__num { color: var(--accent); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+.head__ko { font-size: var(--step-3); letter-spacing: -.015em; line-height: 1.1; text-wrap: balance; }
+.about__ko, .dintro, .hero__gloss, .work__desc, .tl-item__desc { text-wrap: pretty; }
 .head__en {
   font-family: var(--font-display);
   font-style: italic;
@@ -315,7 +337,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   border-radius: 2px;
   color: var(--muted);
   cursor: pointer;
-  transition: color var(--dur-1), border-color var(--dur-1);
+  transition: color var(--dur-1), border-color var(--dur-1), transform var(--dur-1);
 }
 .tgl:hover { color: var(--text); border-color: var(--border); }
 .tgl svg { width: 18px; height: 18px; }
@@ -341,6 +363,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   font-size: var(--step--2);
   letter-spacing: .18em;
   text-transform: uppercase;
+  transition: transform var(--dur-1);
 }
 
 @media (max-width: 900px) {
@@ -454,11 +477,11 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 }
 
 .hero__eyebrow { color: var(--muted); margin-bottom: 1.25rem; }
-.hero__h1 { font-size: var(--step-4); margin-bottom: .75rem; }
+.hero__h1 { font-size: clamp(2.25rem, 1.5rem + 3.6vw, 4.75rem); letter-spacing: -.02em; line-height: 1.06; margin-bottom: .75rem; }
 /* 수학문제연구회 is 7 glyphs and lands on one line; "Mathematical Problem Solving
    Group" is four words and would run to three lines at the same size, swamping
    the hero. Same role, different metrics — so the English gets its own scale. */
-[data-lang="en"] .hero__h1 { font-size: clamp(2rem, 1.15rem + 2.7vw, 3.4rem); }
+[data-lang="en"] .hero__h1 { font-size: clamp(2rem, 1.15rem + 2.9vw, 3.6rem); letter-spacing: -.032em; text-wrap: balance; }
 .hero__en {
   font-family: var(--font-display);
   font-style: italic;
@@ -473,12 +496,19 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
    *loves*, not *is good at*. Genuine math, not decorative TeX. */
 .hero__tex {
   font-family: var(--font-display);
-  font-size: var(--step-1);
+  font-size: clamp(1.375rem, 1.15rem + .8vw, 1.75rem);
   color: var(--text);
-  line-height: 1.6;
+  letter-spacing: .008em;
+  line-height: 1.5;
   margin-bottom: .5rem;
   display: block;
+  font-optical-sizing: auto;
 }
+/* engage Newsreader's opsz axis on every italic-display node (Latin only) */
+.head__en, .hero__en, .about__en, .tl-item__en, .dept__en,
+.work__desc[data-tr="en"] { font-optical-sizing: auto; }
+.about__en, .tl-item__en, .dept__en,
+.work__desc[data-tr="en"] { letter-spacing: .006em; }
 .hero__tex i { font-style: italic; }
 .hero__tex sup { font-size: .6em; vertical-align: super; line-height: 0; }
 .hero__tex .op { color: var(--muted); padding-inline: .15em; }
@@ -571,7 +601,17 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 
 /* The mark arrives once, on load. No traced centreline: the resting state is
    always exactly right, which is the whole point of the mask technique. */
-.js .m2 { opacity: 0; animation: markIn 1100ms var(--ease-out) 150ms forwards; }
+/* considered hero load: eyebrow -> h1 -> formula -> gloss, then the M2 (Move 9) */
+@keyframes heroLine { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.js .hero__eyebrow, .js .hero__h1, .js .hero__tex, .js .hero__gloss { opacity: 0; }
+.js .hero:not(.hero--shown) .hero__eyebrow { animation: heroLine var(--dur-3) var(--ease-out) 80ms both; }
+.js .hero:not(.hero--shown) .hero__h1      { animation: heroLine var(--dur-3) var(--ease-out) 200ms both; }
+.js .hero:not(.hero--shown) .hero__tex     { animation: heroLine var(--dur-3) var(--ease-out) 320ms both; }
+.js .hero:not(.hero--shown) .hero__gloss   { animation: heroLine var(--dur-3) var(--ease-out) 420ms both; }
+.js .hero--shown .hero__eyebrow, .js .hero--shown .hero__h1,
+.js .hero--shown .hero__tex, .js .hero--shown .hero__gloss { opacity: 1; }
+
+.js .m2 { opacity: 0; animation: markIn 1100ms var(--ease-out) 220ms forwards; }
 @keyframes markIn {
   from { opacity: 0; transform: translateY(14px) scale(.985); }
   to   { opacity: 1; transform: none; }
@@ -617,7 +657,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   color: var(--muted);
   border: 1px solid transparent;
   border-radius: 2px;
-  transition: color var(--dur-1), border-color var(--dur-1);
+  transition: color var(--dur-1), border-color var(--dur-1), transform var(--dur-1);
 }
 .social a:hover, .social a:focus-visible { color: var(--accent); border-color: var(--border); }
 .social svg { width: 18px; height: 18px; fill: currentColor; }
@@ -806,6 +846,14 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 }
 @media (max-width: 900px) { .tl-now { left: .35rem; translate: -20% 0; } }
 
+/* the to-scale axis assembles itself as each segment enters (Move 10, motif #2) */
+.js .tl__axis { transform: scaleY(0); transform-origin: top; transition: transform 900ms var(--ease-out); }
+.js .tl__seg.is-drawn .tl__axis { transform: scaleY(1); }
+.js .tl-bracket { transform: scaleY(0); transform-origin: top; transition: transform 760ms var(--ease-out) 240ms; }
+.js .tl-b.is-drawn .tl-bracket { transform: scaleY(1); }
+.js .tl-item__node { transform: scale(0); transition: transform 420ms var(--ease-spring) 160ms; }
+.js .tl-item.in-view .tl-item__node { transform: scale(1); }
+
 /* ----------------------------------------------------------- activities */
 /* gap:1px over a --border background IS the hairline system — no double
    borders, no border-collapse, no orphan hairline at the edges. */
@@ -883,7 +931,22 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
    way through to a system serif with no Hangul. Serif italic on the EN node only. */
 .work__desc[data-tr="en"] { font-family: var(--font-display); font-style: italic; }
 .work__go { color: var(--accent); margin-top: .5rem; }
-.work:hover .work__go { text-decoration: underline; }
+/* draw-in underline (Move 3): accent CTAs only, never body/contact links */
+.work__go, .dept__more, .dback {
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  /* content-box origin so the 1.15em offset is measured from the TEXT box, not
+     the padding box: .dept__more/.dback carry padding-block .5rem, which would
+     otherwise drop the line onto the x-height and read as a strike-through. */
+  background-origin: content-box;
+  background-position: 0 1.15em;
+  background-size: 0% 1px;
+  transition: background-size var(--dur-2) var(--ease-out), color var(--dur-1), transform var(--dur-1);
+}
+.work:hover .work__go, .work:focus-visible .work__go,
+.dept__more:hover, .dept__more:focus-visible,
+.dback:hover, .dback:focus-visible { background-size: 100% 1px; }
 
 /* All three covers are the same lattice/k-NN system at three different k.
    One motif, three states, three meanings. */
@@ -959,6 +1022,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   justify-content: space-between;
   padding: 2rem;
   text-decoration: none;
+  transition: transform var(--dur-1);
 }
 @media (max-width: 640px) { .partner { aspect-ratio: 21 / 9; } }
 .partner__logo { flex: 1; display: grid; place-items: center; width: 100%; }
@@ -1062,7 +1126,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   opacity: 0;
   visibility: hidden;   /* or it stays in the tab order while invisible */
   pointer-events: none;
-  transition: opacity var(--dur-2), visibility var(--dur-2), color var(--dur-1), border-color var(--dur-1);
+  transition: opacity var(--dur-2), visibility var(--dur-2), color var(--dur-1), border-color var(--dur-1), transform var(--dur-1);
 }
 .top.is-on { opacity: 1; visibility: visible; pointer-events: auto; }
 .top:hover { color: var(--accent); border-color: var(--accent); }
@@ -1106,6 +1170,9 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   .js .hero-geo { animation: none !important; transform: none !important; opacity: 1 !important; }
   .js .reveal { opacity: 1 !important; transform: none !important; }
   .act__desc { max-height: none !important; opacity: 1 !important; }
+  .js .hero__eyebrow, .js .hero__h1, .js .hero__tex, .js .hero__gloss { opacity: 1 !important; animation: none !important; transform: none !important; }
+  .js .head::before { transform: none !important; }
+  .js .tl__axis, .js .tl-bracket, .js .tl-item__node { transform: none !important; }
 }
 
 
@@ -1164,7 +1231,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   padding: .75rem 1rem;
   text-decoration: none;
   font-weight: 800;
-  transition: border-color var(--dur-1), color var(--dur-1);
+  transition: border-color var(--dur-1), color var(--dur-1), transform var(--dur-1);
 }
 .sib:hover, .sib:focus-visible { border-color: var(--accent); color: var(--accent); }
 
@@ -1175,4 +1242,19 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   padding-block: .5rem;
   display: inline-block;
 }
-.dept__more:hover, .dept__more:focus-visible { text-decoration: underline; }
+/* .dept__more underline handled by the draw-in rule above */
+
+/* ===================================================== pressed states (Move 1)
+   A designed down-state. MUST stay after every :hover rule so equal-specificity
+   :active wins by source order. Transform only — no shadow, no colour inversion
+   — so it stays inside the flat/hairline system. */
+.tgl:active, .nav__burger:active, .top:active,
+.social a:active, .sib:active, .dback:active {
+  transform: scale(.94);
+  transition-duration: 80ms;
+}
+.work:active    { transform: translateY(-1px) scale(.996); transition-duration: 90ms; }
+.act:active     { transform: translateY(-1px);             transition-duration: 90ms; }
+.partner:active { transform: scale(.99);                   transition-duration: 90ms; }
+.action:active  { background: color-mix(in oklab, var(--accent) 15%, transparent); }
+

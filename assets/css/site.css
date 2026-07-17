@@ -643,8 +643,17 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 }
 @media (max-width: 900px) { .tl__axis { left: .35rem; } }
 
-.tl-a { height: 120px; }
-.tl-b { height: calc(14 * var(--tl-year)); }
+/* Segment A is the 1988 origin. It holds the two things that began that year —
+   the club (left) and ML (right) — which share one node. On mobile they stack;
+   on desktop they sit side by side on the 1988 band. */
+.tl-a { position: relative; }
+@media (max-width: 900px) {
+  .tl-a { display: flex; flex-direction: column; gap: 2rem; padding-top: .5rem; }
+}
+/* Segment B is the to-scale modern era, 2014 → 2026 (12 years). The break above
+   now covers 1989–2013, since ML — the old 2012–2013 entry — moved to its true
+   1988 origin, leaving nothing recorded before 2014. */
+.tl-b { height: calc(12 * var(--tl-year)); }
 
 /* the declared break */
 .tl-break {
@@ -694,7 +703,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 
 .tl-item { position: relative; }
 /* COLLISION BUDGET — read before touching --tl-year or card content.
-   Cards are absolutely positioned by year, so the tightest consecutive pair
+   Cards are absolutely positioned by year (base 2014), so the tightest pair
    sets the minimum pitch. The two layouts have DIFFERENT tightest pairs:
 
      desktop (>900px, sides alternate): tightest SAME-side pair is 2023→2025
@@ -706,7 +715,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
    at a 1-year pitch overlaps its neighbour outright. */
 .tl-b .tl-item {
   position: absolute;
-  top: calc((var(--y) - 2012) * var(--tl-year));
+  top: calc((var(--y) - 2014) * var(--tl-year));
   max-height: 150px;    /* desktop KO: tightest same-side pair is 2yr = 168px */
   overflow: hidden;
 }
@@ -739,8 +748,12 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   .tl-item[data-side="r"] { left: calc(50% + 2.5rem); }
   .tl-item[data-side="l"] .tl-item__node { left: auto; right: -2.95rem; }
   .tl-item[data-side="r"] .tl-item__node { left: -3.05rem; }
-  .tl-a .tl-item { width: 100%; text-align: center; }
-  .tl-a .tl-item__node { left: 50%; translate: -50% 0; }
+  /* Both 1988 items sit on one band; the founding's node IS the 1988 node, so
+     ML's is hidden to avoid a doubled marker one glyph apart. */
+  .tl-a { height: 175px; }
+  [data-lang="en"] .tl-a { height: 205px; }   /* the EN ML blurb runs longer */
+  .tl-a .tl-item { position: absolute; top: 4px; }
+  .tl-a .tl-item[data-side="r"] .tl-item__node { display: none; }
 }
 
 /* One column below 900px: the 2023/2024/2025 cluster sits at a 1-year pitch,
@@ -770,7 +783,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   position: absolute;
   left: 50%;
   translate: -50% 0;
-  top: calc((2014 - 2012) * var(--tl-year));
+  top: 0;   /* 2014, the top of segment B */
   height: calc(9 * var(--tl-year));
   width: 9px;
   border: 2px solid var(--accent);
@@ -784,7 +797,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 
 .tl-now {
   position: absolute;
-  top: calc(14 * var(--tl-year));
+  top: calc(12 * var(--tl-year));
   left: 50%;
   translate: -50% 0;
   color: var(--muted);

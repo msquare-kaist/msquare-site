@@ -43,6 +43,8 @@
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
                "Apple SD Gothic Neo", "Segoe UI", "Malgun Gothic", "맑은 고딕", sans-serif;
   --font-display: "Newsreader", Georgia, "Times New Roman", serif;   /* Latin only */
+  --font-head: "Hahmlet", "Pretendard Variable", Pretendard,
+               "Apple SD Gothic Neo", "Malgun Gothic", serif;   /* display, KO+EN */
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono",
                "Cascadia Mono", Consolas, "Pretendard Variable", monospace;
 
@@ -238,7 +240,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 .js .head::before { transform: scaleX(0); transform-origin: left; transition: transform var(--dur-3) var(--ease-out) 140ms; }
 .js .head.in-view::before { transform: scaleX(1); }
 .head__num { color: var(--accent); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
-.head__ko { font-size: var(--step-3); letter-spacing: -.015em; line-height: 1.1; text-wrap: balance; }
+.head__ko { font-family: var(--font-head); font-weight: 600; font-size: var(--step-3); letter-spacing: -.008em; line-height: 1.14; text-wrap: balance; }
 .about__ko, .dintro, .hero__gloss, .work__desc, .tl-item__desc { text-wrap: pretty; }
 .head__en {
   font-family: var(--font-display);
@@ -477,11 +479,11 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 }
 
 .hero__eyebrow { color: var(--muted); margin-bottom: 1.25rem; }
-.hero__h1 { font-size: clamp(2.25rem, 1.5rem + 3.6vw, 4.75rem); letter-spacing: -.02em; line-height: 1.06; margin-bottom: .75rem; }
+.hero__h1 { font-family: var(--font-head); font-weight: 600; font-size: clamp(2.25rem, 1.5rem + 3.6vw, 4.75rem); letter-spacing: -.01em; line-height: 1.12; margin-bottom: .75rem; }
 /* 수학문제연구회 is 7 glyphs and lands on one line; "Mathematical Problem Solving
    Group" is four words and would run to three lines at the same size, swamping
    the hero. Same role, different metrics — so the English gets its own scale. */
-[data-lang="en"] .hero__h1 { font-size: clamp(2rem, 1.15rem + 2.9vw, 3.6rem); letter-spacing: -.032em; text-wrap: balance; }
+[data-lang="en"] .hero__h1 { font-size: clamp(2rem, 1.15rem + 2.9vw, 3.6rem); letter-spacing: -.015em; text-wrap: balance; }
 .hero__en {
   font-family: var(--font-display);
   font-style: italic;
@@ -578,7 +580,19 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 }
 .m2__ink svg { width: 100%; height: 100%; }
 
-/* Wet ink catching the light — the ONLY ambient motion on the entire site. */
+/* The ink itself flows: the hero mark crossfades between two STATIC gradients
+   (#ink and #ink2, the same violets rotated one band) over 24s. Opacity-only,
+   so it runs on the compositor — never animate stop-color on a shared gradient
+   instead: that invalidates every url(#ink) client and repaints the whole
+   document layer every frame (measured: ~65% of a throttled core, forever).
+   Hero-scoped: the nav/about/footer marks keep the layer at opacity 0, inert. */
+.m2__flow { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes inkxfade { from { opacity: 0; } to { opacity: 1; } }
+  .hero .m2__flow { animation: inkxfade 24s var(--ease-in-out) infinite alternate; }
+}
+
+/* Wet ink catching the light. */
 .m2__spec {
   position: absolute;
   inset: 0;
@@ -603,9 +617,10 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
    always exactly right, which is the whole point of the mask technique. */
 /* considered hero load: eyebrow -> h1 -> formula -> gloss, then the M2 (Move 9) */
 @keyframes heroLine { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes inkWeight { from { font-weight: 300; } to { font-weight: 600; } }
 .js .hero__eyebrow, .js .hero__h1, .js .hero__tex, .js .hero__gloss { opacity: 0; }
 .js .hero:not(.hero--shown) .hero__eyebrow { animation: heroLine var(--dur-3) var(--ease-out) 80ms both; }
-.js .hero:not(.hero--shown) .hero__h1      { animation: heroLine var(--dur-3) var(--ease-out) 200ms both; }
+.js .hero:not(.hero--shown) .hero__h1      { animation: heroLine var(--dur-3) var(--ease-out) 200ms both, inkWeight 1100ms steps(3, jump-end) 200ms both; }   /* steps: 3 layouts, not one per frame */
 .js .hero:not(.hero--shown) .hero__tex     { animation: heroLine var(--dur-3) var(--ease-out) 320ms both; }
 .js .hero:not(.hero--shown) .hero__gloss   { animation: heroLine var(--dur-3) var(--ease-out) 420ms both; }
 .js .hero--shown .hero__eyebrow, .js .hero--shown .hero__h1,
@@ -916,6 +931,12 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   transition: transform var(--dur-2) var(--ease-out), border-color var(--dur-2);
 }
 .work:hover, .work:focus-visible { transform: translateY(-4px); border-color: var(--accent); }
+@media (hover: hover) {
+  .work:hover, .work:focus-visible {
+    transform: translateY(-4px) perspective(900px)
+               rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  }
+}
 .work__cover {
   aspect-ratio: 4 / 3;
   background: var(--bg);
@@ -1196,7 +1217,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 }
 .dback:hover, .dback:focus-visible { color: var(--accent); }
 .dhero__i { color: var(--muted); margin-bottom: .75rem; }
-.dhero__h1 { font-size: var(--step-4); margin-bottom: .75rem; }
+.dhero__h1 { font-family: var(--font-head); font-weight: 600; font-size: var(--step-4); letter-spacing: -.01em; line-height: 1.12; margin-bottom: .75rem; }
 .dhero__lead { color: var(--accent); }
 
 .dbody { padding-block: clamp(3rem, 7vw, 5rem) clamp(5rem, 10vw, 9rem); }

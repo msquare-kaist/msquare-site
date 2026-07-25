@@ -32,7 +32,7 @@ python -m http.server 8000
 
 | 무엇 | 어디 |
 |---|---|
-| **부서 소개 글** (아직 비어 있음) | `departments/*.html` — `.dintro` 문단 **5개 페이지 모두** |
+| **부서 소개 글** (초안 상태 — 확인 필요) | `departments/*.html` — `.dintro` 문단. 사이트에 이미 있는 사실만으로 쓴 초안이니, 각 부장님이 확인하고 고쳐주세요 |
 | 회장 / 부회장 이메일 | `index.html` — `연락` 섹션의 `<dl class="dl">` |
 | 부서장 이름 | `index.html`의 `.dept__lead`, 그리고 해당 `departments/*.html`의 `.dhero__lead` |
 | 신청 폼 링크 (ML / KAI-Square) | `index.html` — `발간 · 자료` 섹션과 `연락` 섹션 (두 군데 모두) |
@@ -105,6 +105,11 @@ python tools/render_videos.py ml   # 하나만
   "상수가 같은가"가 지키는 게 아닙니다. `site.css`의 `COLLISION BUDGET` 주석 참고.
 - **Newsreader는 라틴 전용 폰트입니다.** 한글에 적용하면 한글이 없는 세리프로 떨어져서 깨집니다.
   한글에는 절대 쓰지 마세요 (`.work__desc[data-tr="en"]`처럼 영어 노드에만).
+- **폰트는 세 단계입니다**: 큰 제목 = Hahmlet(한글 세리프, 가변), 본문/UI = Pretendard,
+  라벨 = IBM Plex Mono, 영어 디스플레이 문장 = Newsreader 이탤릭. 이 위계를 섞지 마세요.
+- **부서 섹션의 오각형은 사실 4차원 정오포체(5-cell)입니다.** K5는 4-simplex의 변 그래프라서,
+  JS(`site.js` §6b)가 4D 회전을 투영해 좌표만 바꿔 그립니다. 마크업의 납작한 오각형이
+  JS 없음/모션 최소화 상태 그 자체이니, `data-a/b/dept` 속성을 지우면 안 됩니다.
 - **브랜드 보라색(`--ink-*`)은 장식 전용입니다.** 대비가 모자라서 글자에 쓰면 안 됩니다.
   글자는 `--text` / `--muted` / `--accent`만.
 - `opacity`로 글자를 흐리게 하지 마세요. 검증된 대비값이 조용히 깨집니다.

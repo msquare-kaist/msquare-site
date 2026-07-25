@@ -339,9 +339,11 @@
       stopParallax();
       reveals.forEach(function (el) { el.classList.add('in-view'); });
       vidCtl.forEach(function (c) { c.stop(); });
+      if (simplex) simplex.stop();
     } else {
       startParallax();
       vidCtl.forEach(function (c) { c.start(); });
+      if (simplex) simplex.start();
     }
   });
 
@@ -370,6 +372,144 @@
       var n = +v.dataset.dept;
       v.addEventListener('pointerenter', function () { litDept(n, true); });
       v.addEventListener('pointerleave', function () { litDept(n, false); });
+    });
+  }
+
+  /* ----------------------------------- 6b. the K5 is really a 4-simplex
+     K5 is the edge graph of the 4-simplex (5-cell): 5 vertices, 10 edges.
+     So the flat pentagram is one PROJECTION of a 4D object — and here it
+     slowly tumbles through a double rotation (x–w and y–z planes, at
+     incommensurate speeds, so the pose never repeats), projected 4D→3D→2D
+     into the same SVG. Same motif, one dimension deeper.
+
+     The baked pentagram markup IS the no-JS / reduced-motion state: this
+     code only rewrites coordinates on the existing elements, so data-a/b
+     and data-dept survive and the roster cross-highlight keeps working. */
+  var simplex = (function () {
+    var svg = k5;
+    if (!svg) return null;
+    var sVerts = $$('.k5__v', svg);
+    var sEdges = $$('.k5__edge', svg);
+    if (sVerts.length !== 5 || sEdges.length !== 10) return null;
+
+    // Regular 5-cell, centred: four "base" vertices and an apex along w.
+    var R5 = Math.sqrt(5);
+    var V4 = [
+      [1, 1, 1, -1 / R5], [1, -1, -1, -1 / R5],
+      [-1, 1, -1, -1 / R5], [-1, -1, 1, -1 / R5],
+      [0, 0, 0, 4 / R5],
+    ];
+    var C = 100, S = 46;                 // centre + scale in the 200x200 viewBox
+    var running = false, inView = !('IntersectionObserver' in window);
+    var raf = 0, acc = 0, last = null, tick = 0;
+
+    // The baked flat pentagram is the contract for no-JS AND reduced motion.
+    // Snapshot it before the first frame so stop() can put it back — otherwise
+    // a live RM flip would freeze the mark in a skewed, half-faded mid-pose.
+    var baked = {
+      v: sVerts.map(function (el) {
+        return [el.getAttribute('cx'), el.getAttribute('cy'), el.getAttribute('r')];
+      }),
+      e: sEdges.map(function (el) {
+        return [el.getAttribute('x1'), el.getAttribute('y1'),
+                el.getAttribute('x2'), el.getAttribute('y2')];
+      }),
+    };
+    function restore() {
+      sVerts.forEach(function (el, i) {
+        el.setAttribute('cx', baked.v[i][0]);
+        el.setAttribute('cy', baked.v[i][1]);
+        el.setAttribute('r', baked.v[i][2]);
+        el.removeAttribute('fill-opacity');
+      });
+      sEdges.forEach(function (el, i) {
+        el.setAttribute('x1', baked.e[i][0]); el.setAttribute('y1', baked.e[i][1]);
+        el.setAttribute('x2', baked.e[i][2]); el.setAttribute('y2', baked.e[i][3]);
+        el.removeAttribute('stroke-opacity');
+      });
+    }
+
+    function frame(ts) {
+      if (last !== null) acc += ts - last;
+      last = ts;
+      tick ^= 1;
+      if (tick) {                        // draw every OTHER frame: sub-pixel
+        if (running) raf = requestAnimationFrame(frame);   // motion, half cost
+        return;
+      }
+      var t = acc / 1000;
+      // golden-ratio speed ratio — genuinely irrational, so the pose never
+      // exactly repeats (0.22/0.143 was 20:13 and looped every ~9.5 min)
+      var a = t * .22, b = t * (.22 / 1.618033988749895);
+      var ca = Math.cos(a), sa = Math.sin(a);
+      var cb = Math.cos(b), sb = Math.sin(b);
+      var P = V4.map(function (v) {
+        var x = v[0] * ca - v[3] * sa, w = v[0] * sa + v[3] * ca;   // x–w plane
+        var y = v[1] * cb - v[2] * sb, z = v[1] * sb + v[2] * cb;   // y–z plane
+        var k4 = 2.8 / (2.8 - w * .55);  // 4D -> 3D perspective
+        var X = x * k4, Y = y * k4, Z = z * k4;
+        var k3 = 3.4 / (3.4 - Z * .8);   // 3D -> 2D perspective
+        return { x: C + X * k3 * S, y: C + Y * k3 * S,
+                 d: Math.max(0, Math.min(1, (Z + 1.7) / 3.4)) };    // depth 0..1
+      });
+      sVerts.forEach(function (el, i) {
+        el.setAttribute('cx', P[i].x.toFixed(2));
+        el.setAttribute('cy', P[i].y.toFixed(2));
+        el.setAttribute('r', (3 + 2.6 * P[i].d).toFixed(2));
+        el.setAttribute('fill-opacity', (.4 + .6 * P[i].d).toFixed(2));
+      });
+      sEdges.forEach(function (el) {
+        var i = +el.dataset.a - 1, j = +el.dataset.b - 1;
+        el.setAttribute('x1', P[i].x.toFixed(2)); el.setAttribute('y1', P[i].y.toFixed(2));
+        el.setAttribute('x2', P[j].x.toFixed(2)); el.setAttribute('y2', P[j].y.toFixed(2));
+        el.setAttribute('stroke-opacity', (.3 + .65 * ((P[i].d + P[j].d) / 2)).toFixed(2));
+      });
+      if (running) raf = requestAnimationFrame(frame);
+    }
+    function start() {
+      if (running || RM.matches || !inView) return;
+      running = true; last = null;
+      raf = requestAnimationFrame(frame);
+    }
+    function stop() {
+      running = false; last = null;
+      cancelAnimationFrame(raf);
+      restore();   // the resting state is always the baked pentagram
+    }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          inView = e.isIntersecting;
+          if (inView) start(); else stop();
+        });
+      }, { threshold: .1 }).observe(svg);
+    } else {
+      start();
+    }
+    return { start: start, stop: stop };
+  })();
+
+  /* ------------------------------ 6c. pointer depth on the Works cards
+     The plane tilts toward the cursor (≤ ~3.5°). The card's existing 220ms
+     ease-out transition is what makes it FLOW after the pointer rather than
+     snap. Hover-capable devices only; under reduced motion the vars are never
+     written, so the rotation stays zero. */
+  if (HOVER.matches) {
+    $$('.work').forEach(function (card) {
+      card.addEventListener('pointermove', function (ev) {
+        if (RM.matches) return;
+        var r = card.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        var px = (ev.clientX - r.left) / r.width - .5;
+        var py = (ev.clientY - r.top) / r.height - .5;
+        card.style.setProperty('--ry', (px * 5).toFixed(2) + 'deg');
+        card.style.setProperty('--rx', (py * -4).toFixed(2) + 'deg');
+      });
+      card.addEventListener('pointerleave', function () {
+        card.style.removeProperty('--ry');
+        card.style.removeProperty('--rx');
+      });
     });
   }
 

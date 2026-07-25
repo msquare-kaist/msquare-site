@@ -29,7 +29,7 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
 <!-- Pretendard, dynamic-subset: the browser fetches only the woff2 chunks whose
      unicode-range this page uses (~a dozen of ~70), not all 11,172 Hangul syllables. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@1,6..72,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@300..800&family=IBM+Plex+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@1,6..72,400&display=swap">
 <link rel="stylesheet" href="../assets/css/site.css">
 </head>
 
@@ -47,6 +47,14 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
       <stop offset="0.55" stop-color="var(--ink-2)"/>
       <stop offset="1" stop-color="var(--ink-3)"/>
     </linearGradient>
+    <!-- the same three violets, rotated one band along the curve. The hero M2
+         crossfades between #ink and #ink2 on the COMPOSITOR (opacity only) —
+         animating stop-color instead repaints the whole document every frame. -->
+    <linearGradient id="ink2" gradientUnits="userSpaceOnUse" x1="78" y1="1016" x2="1194" y2="297">
+      <stop offset="0" stop-color="var(--ink-2)"/>
+      <stop offset="0.55" stop-color="var(--ink-3)"/>
+      <stop offset="1" stop-color="var(--ink-1)"/>
+    </linearGradient>
     <!-- 36 x 36*sqrt(3) = a TRUE triangular lattice, not a square design grid -->
     <pattern id="lat" width="36" height="62.3538" patternUnits="userSpaceOnUse">
       <circle cx="0" cy="0" r="1.1" fill="var(--lattice)"/>
@@ -60,7 +68,7 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
 <header class="nav" id="nav">
   <div class="nav__in">
     <a class="nav__brand" href="../index.html" aria-label="MSquare 수학문제연구회">
-      <div class="m2" aria-hidden="true"><div class="m2__glow"><div class="m2__ink"><svg viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink)"/></svg><div class="m2__spec"></div></div></div></div><span><span data-tr="ko" lang="ko">수학문제연구회</span><span data-tr="en" lang="en">MSquare</span></span>
+      <div class="m2" aria-hidden="true"><div class="m2__glow"><div class="m2__ink"><svg viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink)"/></svg><svg class="m2__flow" viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink2)"/></svg><div class="m2__spec"></div></div></div></div><span><span data-tr="ko" lang="ko">수학문제연구회</span><span data-tr="en" lang="en">MSquare</span></span>
     </a>
     <button class="nav__burger" id="nav-burger" aria-expanded="false" aria-controls="nav-nav">Menu</button>
     <div class="nav__nav" id="nav-nav">
@@ -101,12 +109,12 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
       <div class="dgrid">
         <div class="reveal">
           <!-- ============================================================
-               부장님께: 이 문단만 채워주세요. 나머지는 그대로 두시면 됩니다.
-               아래 두 <p> 중 하나는 한국어, 하나는 영어입니다. 둘 다 바꿔주세요.
-               TO THE DEPARTMENT HEAD: replace the two paragraphs below — one
-               Korean, one English. Everything else on this page is already done.
+               아래 소개는 사이트에 이미 있는 사실만으로 쓴 초안입니다.
+               부장님께서 확인하시고 자유롭게 고쳐주세요 (한국어/영어 두 문단 모두).
+               DRAFT copy written only from facts already on this site —
+               department heads, please review and edit both paragraphs.
                ============================================================ -->
-          <p class="dintro" data-tr="ko" lang="ko">이 부서가 하는 일을 두세 문장으로 소개해 주세요. 무엇을 만들고, 언제 모이고, 새로 들어온 회원은 무엇부터 하게 되는지 적어주시면 좋습니다.</p><p class="dintro" data-tr="en" lang="en">Describe what this department does in two or three sentences: what it makes, when it meets, and what a new member would start with.</p>
+          <p class="dintro" data-tr="ko" lang="ko">경시·올림피아드 스타일의 문제를 다루는 부서입니다. 좋은 문제를 고르고 함께 풀며, 문제 풀이의 즐거움을 나눕니다.</p><p class="dintro" data-tr="en" lang="en">The department for competition-style problems. We pick good olympiad-flavoured problems, solve them together, and share the joy of problem solving.</p>
           
         </div>
         <aside class="dside reveal">
@@ -132,7 +140,7 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
 <footer class="foot">
   <div class="wrap foot__in">
     <div class="foot__brand">
-      <div class="m2" aria-hidden="true"><div class="m2__glow"><div class="m2__ink"><svg viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink)"/></svg><div class="m2__spec"></div></div></div></div>
+      <div class="m2" aria-hidden="true"><div class="m2__glow"><div class="m2__ink"><svg viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink)"/></svg><svg class="m2__flow" viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink2)"/></svg><div class="m2__spec"></div></div></div></div>
       <p class="foot__txt mono mono--ko" data-tr="any">© copyright MSquare · 최푸른하늘, 김강민</p>
     </div>
     <p class="foot__txt mono mono--ko" data-tr="ko" lang="ko">1988—2026 · 대전 KAIST</p><p class="foot__txt mono mono--ko" data-tr="en" lang="en">1988—2026 · KAIST, Daejeon</p>

@@ -43,17 +43,17 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
          shape a DIFFERENT mapping. These are the measured ink-bbox diagonal, in
          the PNG's own pixel space. -->
     <linearGradient id="ink" gradientUnits="userSpaceOnUse" x1="78" y1="1016" x2="1194" y2="297">
-      <stop offset="0" stop-color="var(--ink-1)"/>
-      <stop offset="0.55" stop-color="var(--ink-2)"/>
-      <stop offset="1" stop-color="var(--ink-3)"/>
+      <stop offset="0" stop-color="var(--mark-a)"/>
+      <stop offset="0.55" stop-color="var(--mark-b)"/>
+      <stop offset="1" stop-color="var(--mark-c)"/>
     </linearGradient>
-    <!-- the same three violets, rotated one band along the curve. The hero M2
+    <!-- the same mark tones, rotated one band along the curve. The hero M2
          crossfades between #ink and #ink2 on the COMPOSITOR (opacity only) —
          animating stop-color instead repaints the whole document every frame. -->
     <linearGradient id="ink2" gradientUnits="userSpaceOnUse" x1="78" y1="1016" x2="1194" y2="297">
-      <stop offset="0" stop-color="var(--ink-2)"/>
-      <stop offset="0.55" stop-color="var(--ink-3)"/>
-      <stop offset="1" stop-color="var(--ink-1)"/>
+      <stop offset="0" stop-color="var(--mark-b)"/>
+      <stop offset="0.55" stop-color="var(--mark-c)"/>
+      <stop offset="1" stop-color="var(--mark-a)"/>
     </linearGradient>
     <!-- 36 x 36*sqrt(3) = a TRUE triangular lattice, not a square design grid -->
     <pattern id="lat" width="36" height="62.3538" patternUnits="userSpaceOnUse">
@@ -92,6 +92,7 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
 
 <main id="main">
   <section class="dhero">
+    <div class="aurora" aria-hidden="true"><i></i><i></i></div>
     <svg class="hero-geo" id="hero-geo" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
       <g class="hero-geo__field"><rect width="1440" height="900" fill="url(#lat)"/></g>
       <g class="hero-geo__knn"></g>
@@ -118,13 +119,15 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
           
         </div>
         <aside class="dside reveal">
+          <!-- Decorative, GIF-like: no caption, no controls, untouchable
+               (pointer-events: none in CSS). Under reduced motion it never
+               plays and the poster — the finished frame — stands in. -->
           <figure class="dfig">
-            <video class="dvid" width="854" height="480" playsinline muted loop controls
+            <video class="dvid" width="854" height="480" playsinline muted loop
                    preload="none" poster="../assets/video/competition.png"
-                   aria-describedby="fig-competition">
+                   aria-hidden="true" tabindex="-1">
               <source src="../assets/video/competition.webm" type="video/webm">
             </video>
-            <figcaption class="dfig__cap mono mono--ko" id="fig-competition"><span data-tr="ko" lang="ko">완전그래프의 변의 개수 — n(n−1)/2</span><span data-tr="en" lang="en">Edges of a complete graph — n(n−1)/2</span></figcaption>
           </figure>
         </aside>
       </div>

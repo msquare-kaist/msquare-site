@@ -13,6 +13,7 @@ assets/video/*.webm|png  부서별 manim 애니메이션 + 포스터 (미리 렌
 tools/gen_geo.py         Our Works 표지 · K5 오각형 SVG 생성기
 tools/manim_scenes.py    부서별 애니메이션 장면
 tools/render_videos.py   위 장면들을 webm으로 렌더
+tools/checks/            회귀 테스트 3종 (아래 참고)
 CNAME                    커스텀 도메인
 ```
 
@@ -27,6 +28,16 @@ python -m http.server 8000
 ```
 
 `file://`로 열지 마세요 — 폰트와 마스크가 깨집니다.
+
+사이트를 고친 뒤에는 회귀 테스트를 돌려보세요 (`pip install playwright` 필요, 서버 켠 상태에서):
+
+```bash
+python tools/checks/check1.py   # 6개 페이지 x 한/영: 언어 누출, 가로 넘침, JS 에러, 404
+python tools/checks/check2.py   # JS 꺼짐 / 모션 최소화 / 영상 정책 / 연혁 축 겹침
+python tools/checks/check3.py   # 등장 연출이 "완성된 상태"로 끝나는지
+```
+
+셋 다 마지막 줄에 `FAILURES: 0`이 나와야 합니다.
 
 ## 자주 바꾸는 것
 
@@ -107,6 +118,11 @@ python tools/render_videos.py ml   # 하나만
   한글에는 절대 쓰지 마세요 (`.work__desc[data-tr="en"]`처럼 영어 노드에만).
 - **폰트는 세 단계입니다**: 큰 제목 = Hahmlet(한글 세리프, 가변), 본문/UI = Pretendard,
   라벨 = IBM Plex Mono, 영어 디스플레이 문장 = Newsreader 이탤릭. 이 위계를 섞지 마세요.
+- **M² 로고 색은 `--mark-a/b/c` 토큰입니다.** 다크 = 흰색 계열, 라이트 = 먹색 계열.
+  흰 로고는 흰 배경에서 안 보이므로 라이트 모드를 흰색으로 바꾸지 마세요.
+  보라색은 로고 "안"이 아니라 로고 "주변"(글로우·오로라)에 삽니다.
+- **부서 영상은 장식입니다** (`aria-hidden`, `pointer-events:none`, 컨트롤 없음, GIF처럼 자동 반복).
+  모션 최소화 설정에서는 재생되지 않고 포스터(완성 프레임)가 대신 보입니다.
 - **부서 섹션의 오각형은 사실 4차원 정오포체(5-cell)입니다.** K5는 4-simplex의 변 그래프라서,
   JS(`site.js` §6b)가 4D 회전을 투영해 좌표만 바꿔 그립니다. 마크업의 납작한 오각형이
   JS 없음/모션 최소화 상태 그 자체이니, `data-a/b/dept` 속성을 지우면 안 됩니다.

@@ -937,8 +937,8 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
    which leaves no room for the description line. The year, the event and its
    English gloss are load-bearing; the description is not. */
 @media (max-width: 900px) {
-  :root { --tl-year: 66px; }
-  [data-lang="en"] { --tl-year: 76px; }
+  :root { --tl-year: 62px; }
+  [data-lang="en"] { --tl-year: 68px; }
   .tl-item__desc { display: none; }
   .tl-b .tl-item { max-height: 58px; }
   [data-lang="en"] .tl-b .tl-item { max-height: 66px; }
@@ -1133,15 +1133,19 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 }
 /* < 1120px — the roster. Reads like a masthead, stacks perfectly. Never 3+2. */
 @media (max-width: 1119px) {
+  /* Pack left and let the CTA float right. The old rule paired space-between
+     with wrap, so as soon as a long English name forced a wrap the pieces flew
+     to opposite edges and "Learn more" was stranded on its own line. Packing
+     left keeps Korean on ONE line (it fits) and lets English wrap tidily. */
   .dept {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
     flex-wrap: wrap;
-    padding-block: 1.5rem;
+    gap: .35rem .875rem;
+    padding-block: 1.25rem;
     border-top: 1px solid var(--border);
   }
+  .dept__more { margin-left: auto; }
   .depts .dept:last-child { border-bottom: 1px solid var(--border); }
 }
 .dept__i { color: var(--muted); }

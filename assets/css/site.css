@@ -830,7 +830,12 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 /* Segment B is the to-scale modern era, 2014 → 2026 (12 years). The break above
    now covers 1989–2013, since ML — the old 2012–2013 entry — moved to its true
    1988 origin, leaving nothing recorded before 2014. */
-.tl-b { height: calc(12 * var(--tl-year)); }
+.tl-b { height: calc(12 * var(--tl-year) - var(--tl-squeeze, 0px)); }
+/* The second declared compression. 2015-2022 has nothing recorded in it; on a
+   phone those eight empty years cost ~500px of blank axis, so they are squeezed
+   and LABELLED — the same convention as the 1989-2013 break, applied twice.
+   Desktop keeps --tl-squeeze at 0, so the axis there is strictly to scale. */
+.tl-squeeze { display: none; }
 
 /* the declared break */
 .tl-break {
@@ -896,7 +901,8 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   max-height: 150px;    /* desktop KO: tightest same-side pair is 2yr = 168px */
   overflow: hidden;
 }
-[data-lang="en"] .tl-b .tl-item { max-height: 180px; }   /* 2yr = 192px here */
+[data-lang="en"] .tl-b .tl-item { max-height: 180px; }
+.tl-b .tl-item[data-sq] { top: calc((var(--y) - 2014) * var(--tl-year) - var(--tl-squeeze, 0px)); }   /* 2yr = 192px here */
 .tl-item__node {
   position: absolute;
   left: -3.05rem;
@@ -946,6 +952,15 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   .tl-b .tl-item__ko { font-size: var(--step-1); line-height: 1.25; }
   .tl-b .tl-item__yr { margin-bottom: .1rem; }
   .tl-break { height: 120px; }   /* the declared break needs less runway here */
+  /* squeeze the empty 2015-2022 run to ~1.5 years of axis, and say so */
+  :root { --tl-squeeze: calc(6.5 * var(--tl-year)); }
+  .tl-squeeze {
+    display: block;
+    position: absolute;
+    left: 2.75rem;
+    top: calc(1.15 * var(--tl-year));
+    color: var(--muted);
+  }
 }
 /* At 320px the longest title (Jane Street 스폰서십 체결) wraps to two lines and
    overruns the cap, which would silently clip it. Raise both, together. */
@@ -965,7 +980,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   left: 50%;
   translate: -50% 0;
   top: 0;   /* 2014, the top of segment B */
-  height: calc(9 * var(--tl-year));
+  height: calc(9 * var(--tl-year) - var(--tl-squeeze, 0px));
   width: 9px;
   border: 2px solid var(--accent);
   border-left: 0;
@@ -978,7 +993,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 
 .tl-now {
   position: absolute;
-  top: calc(12 * var(--tl-year));
+  top: calc(12 * var(--tl-year) - var(--tl-squeeze, 0px));
   left: 50%;
   translate: -50% 0;
   color: var(--muted);

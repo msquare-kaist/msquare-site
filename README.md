@@ -1,6 +1,13 @@
 # msquare.or.kr
 
-KAIST 수학문제연구회 (MSquare) 홈페이지 · <https://www.msquare.or.kr/>
+KAIST 수학문제연구회 (MSquare) 홈페이지
+
+- **새 사이트(작업 중)** · <https://new.msquare.or.kr/> ← 이 저장소
+- 현재 운영 중인 사이트 · <https://www.msquare.or.kr/> (구 저장소 `msquare-kaist.github.io`)
+
+새 사이트가 확정되면 이 저장소의 `CNAME` 파일을 `www.msquare.or.kr`로 바꾸고,
+구 저장소의 Pages 설정에서 도메인을 먼저 비워주면 교체가 끝납니다.
+(도메인 하나는 Pages 사이트 하나에만 연결됩니다.)
 
 정적 사이트입니다. **빌드 과정이 없습니다.** `index.html`을 고치고 push하면 GitHub Pages가 바로 배포합니다.
 

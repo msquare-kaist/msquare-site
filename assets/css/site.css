@@ -937,19 +937,23 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
    which leaves no room for the description line. The year, the event and its
    English gloss are load-bearing; the description is not. */
 @media (max-width: 900px) {
-  :root { --tl-year: 104px; }
-  [data-lang="en"] { --tl-year: 124px; }
+  :root { --tl-year: 66px; }
+  [data-lang="en"] { --tl-year: 76px; }
   .tl-item__desc { display: none; }
-  .tl-b .tl-item { max-height: 92px; }
-  [data-lang="en"] .tl-b .tl-item { max-height: 112px; }
+  .tl-b .tl-item { max-height: 58px; }
+  [data-lang="en"] .tl-b .tl-item { max-height: 66px; }
+  /* the cluster card must fit a 1-year pitch: smaller title, tighter year gap */
+  .tl-b .tl-item__ko { font-size: var(--step-1); line-height: 1.25; }
+  .tl-b .tl-item__yr { margin-bottom: .1rem; }
+  .tl-break { height: 120px; }   /* the declared break needs less runway here */
 }
 /* At 320px the longest title (Jane Street 스폰서십 체결) wraps to two lines and
    overruns the cap, which would silently clip it. Raise both, together. */
 @media (max-width: 380px) {
-  :root { --tl-year: 132px; }
-  [data-lang="en"] { --tl-year: 140px; }
-  .tl-b .tl-item { max-height: 118px; }
-  [data-lang="en"] .tl-b .tl-item { max-height: 126px; }
+  :root { --tl-year: 88px; }
+  [data-lang="en"] { --tl-year: 96px; }
+  .tl-b .tl-item { max-height: 80px; }
+  [data-lang="en"] .tl-b .tl-item { max-height: 88px; }
 }
 
 /* The 2014–2023 entry is an INTERVAL, so it is drawn as one. This bracket is
@@ -1402,3 +1406,111 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
 .partner:active { transform: scale(.99);                   transition-duration: 90ms; }
 .action:active  { background: color-mix(in oklab, var(--accent) 15%, transparent); }
 
+
+/* ==========================================================================
+   MOBILE COMFORT  (phones only — every rule is inside a max-width query, so
+   the desktop layout is byte-identical to before)
+
+   Measured before: 8966px = 10.6 screens at 390x844, with 10 tap targets
+   under the 44px minimum. The page was not badly designed for phones so much
+   as never *tuned* for them: desktop's generous section rhythm was pinned to
+   its floor and still cost 160px a section, and several links inherited a
+   text-sized hit area.
+   ========================================================================== */
+@media (max-width: 640px) {
+  /* --- vertical rhythm: the single biggest win, 8 sections x 64px --- */
+  section { padding-block: 3rem; }
+  .head { margin-bottom: 1.5rem; }
+  .head::before { margin-bottom: .75rem; }
+  .head__eyebrow { margin-bottom: .5rem; }
+  .about__grid { gap: 2rem; }
+  .about__rule { margin-block: 1.5rem; }
+  .about__side { gap: 1.5rem; }
+  .contact__grid { gap: 2rem; }
+  .contact__social { margin-top: 1.25rem; }
+  .foot { padding-block: 2rem 1.75rem; }
+
+  /* --- reading: shorter measure wants tighter leading, and the mono label
+         tier (over half the page's text lines) was set below comfort --- */
+  body { line-height: 1.72; }
+  .about__ko, .dintro, .hero__gloss { line-height: 1.7; }
+  :root { --step--2: .8125rem; }        /* 12 -> 13px */
+  .mono { line-height: 1.3; }           /* keeps the same line box as before */
+  .mono--ko { letter-spacing: .03em; }  /* Latin .mono keeps its .18em identity */
+
+  /* --- activities: 8 squares become a numbered index. Same eight items, same
+         descriptions (already always-visible on touch), a third of the height.
+         justify-content must be reset: the base rule is space-between, which
+         in row direction throws the number and the text to opposite edges. --- */
+  .act {
+    aspect-ratio: auto;
+    min-height: 0;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: 1.125rem 1.25rem;
+  }
+  .act > div { flex: 1 1 auto; min-width: 0; }
+  .act__i { flex: none; }
+  .act__ko { font-size: var(--step-1); line-height: 1.3; }
+  /* In the row layout the tagline always shows. Gating it on hover only made
+     sense for the tall desktop cards; on a narrow screen "hover to reveal"
+     strands the text on any device that reports hover:hover but is hand-held
+     (touch laptops, some tablets) — and there is room for it here. */
+  .act__desc { max-height: none; opacity: 1; }
+
+  /* --- works: the generated covers are decorative, so they yield first --- */
+  .works { gap: 1.25rem; }
+  .work__cover { aspect-ratio: 16 / 9; }
+  .work__body { padding: 1.25rem; }
+}
+
+/* --- touch targets: every one of the 10 measured under 44px ---------------- */
+@media (max-width: 1023px) {
+  .nav__brand { min-height: 44px; flex: 0 1 auto; min-width: 0; }
+  .nav__brand > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nav__burger {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .625rem;
+    white-space: nowrap;
+  }
+  .nav__in { flex-wrap: nowrap; }
+  .nav__burger, .nav__tools { flex: 0 0 auto; }
+  /* the .no-js overrides further down must keep winning — they come later */
+}
+@media (max-width: 380px) {
+  .nav__brand > span { display: none; }   /* the mark alone is the home link */
+  .nav__brand { min-width: 44px; justify-content: center; }
+}
+@media (max-width: 768px) {
+  /* the three email links were 19px hairlines — the worst targets on the site */
+  .dl dt, .dl dd { display: flex; align-items: center; min-height: 56px; padding-block: .5rem; }
+  .dl dd { justify-content: flex-end; }
+  .dl dd a { display: flex; align-items: center; justify-content: flex-end; flex: 1; min-height: 44px; }
+}
+@media (pointer: coarse) {
+  .nav__cta summary { min-height: 44px; }
+  /* the whole department row becomes the target, not the link in its corner */
+  .dept { position: relative; }
+  .dept__more { min-height: 44px; display: inline-flex; align-items: center; }
+  .dept__more::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+  .dback { display: inline-flex; align-items: center; min-height: 44px; padding-inline: .5rem; margin-inline: -.5rem; }
+  /* kill the ~300ms tap-commit delay on everything interactive */
+  a, button, summary, .act { touch-action: manipulation; }
+}
+
+/* --- notched phones: opt into the full screen, then pay for it on every
+       fixed edge, or the home indicator eats the back-to-top button --- */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .nav__in { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+  .top {
+    right: calc(1.5rem + env(safe-area-inset-right, 0px));
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  @media (max-width: 1023px) {
+    .nav__nav { padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px)); }
+  }
+}

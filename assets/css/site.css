@@ -367,6 +367,72 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   :root:not([data-theme="light"]) .tgl__moon { display: none; }
 }
 
+/* ------------------------------------------- the subscribe CTA (top right)
+   A native <details> dropdown holding the two DIRECT form links — one click
+   from every page at every width, and it opens even with JS disabled. JS only
+   adds outside-click / Esc closing. On the narrowest phones the header can't
+   hold it, so it moves into the menu panel as .nav__mcta rows instead. */
+.nav__cta { position: relative; }
+.nav__cta summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: .6rem .9rem;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: .08em;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background var(--dur-1), transform var(--dur-1);
+}
+.nav__cta summary::-webkit-details-marker { display: none; }
+.nav__cta summary:hover { background: color-mix(in oklab, var(--accent) 88%, var(--text)); }
+.nav__cta summary:active { transform: scale(.96); transition-duration: 80ms; }
+.nav__cta-car { font-size: .7em; transition: rotate var(--dur-2) var(--ease-out); }
+.nav__cta[open] .nav__cta-car { rotate: 180deg; }
+.nav__cta-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 15rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: .35rem;
+  z-index: 60;
+}
+.nav__cta-panel a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: .8rem .75rem;
+  text-decoration: none;
+  border-radius: 2px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nav__cta-panel a:hover,
+.nav__cta-panel a:focus-visible { background: color-mix(in oklab, var(--accent) 8%, transparent); color: var(--accent); }
+.nav__cta-panel .mono { color: var(--accent); }
+
+/* menu-panel fallback rows: only on the narrowest phones */
+.nav__mcta { display: none; }
+@media (max-width: 540px) {
+  .nav__cta { display: none; }
+  .nav__mcta { display: block; }
+  .nav__mcta a { color: var(--accent); }
+  /* no-JS: the menu panel is inert, so the header CTA must stay — the static
+     no-js nav wraps freely and has room for it */
+  .no-js .nav__cta { display: block; }
+  .no-js .nav__mcta { display: none; }
+}
+
 /* The mobile trigger is the word MENU, not a hamburger. */
 .nav__burger {
   display: none;
@@ -382,7 +448,7 @@ section { padding-block: clamp(5rem, 10vw, 9rem); position: relative; }
   transition: transform var(--dur-1);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   .nav__burger { display: block; }
   .nav__nav {
     position: fixed;

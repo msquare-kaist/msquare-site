@@ -125,8 +125,27 @@
       }
     });
     // A resize past the breakpoint must not strand the page with overflow:hidden.
-    window.matchMedia('(min-width: 901px)').addEventListener('change', function (e) {
+    // (nav collapses at 1023px — seven links plus the CTA don't fit below that)
+    window.matchMedia('(min-width: 1024px)').addEventListener('change', function (e) {
       if (e.matches) setMenu(false);
+    });
+  }
+
+  /* subscribe CTA dropdown: <details> is fully functional without JS — this
+     only adds the expected closing behaviours (outside click, Esc, after use) */
+  var cta = $('#nav-cta');
+  if (cta) {
+    document.addEventListener('click', function (e) {
+      if (cta.open && !cta.contains(e.target)) cta.open = false;
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && cta.open) {
+        cta.open = false;
+        $('summary', cta).focus();
+      }
+    });
+    $$('a', cta).forEach(function (a) {
+      a.addEventListener('click', function () { cta.open = false; });
     });
   }
 

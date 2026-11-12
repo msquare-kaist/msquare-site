@@ -4,9 +4,8 @@
 
    Everything here is an ENHANCEMENT. The page renders complete and correct
    with JS disabled: the M² is a static masked mark, the covers and the K5 are
-   baked SVG, timeline positions are CSS calc(), .reveal is visible by default
-   (only the .js class, set inline in <head>, hides it), and the nav degrades
-   to a plain link list via .no-js.
+   baked SVG, timeline positions are CSS calc(), and the nav degrades to a
+   plain link list via .no-js.
 
    AUTHOR-TIME NOTE: latticePoints() and knn() below are the JS twins of the
    generator in tools/gen_geo.py, which bakes the three Our Works covers and
@@ -94,14 +93,19 @@
     }, { rootMargin: '-40px 0px 0px 0px' }).observe(sentinel);
   }
 
-  /* mobile menu: the trigger is the word MENU. Focus trapped, Esc closes. */
+  /* mobile menu: the trigger is a word (메뉴 / Menu), not a hamburger. Focus
+     trapped, Esc closes. Both languages ship, CSS shows one. */
   var burger = $('#nav-burger');
   var panel = $('#nav-nav');
+  var BURGER = {
+    open:  '<span data-tr="ko" lang="ko">닫기</span><span data-tr="en" lang="en">Close</span>',
+    shut:  '<span data-tr="ko" lang="ko">메뉴</span><span data-tr="en" lang="en">Menu</span>',
+  };
   function setMenu(open) {
     if (!panel || !burger) return;
     panel.classList.toggle('is-open', open);
     burger.setAttribute('aria-expanded', String(open));
-    burger.textContent = open ? 'Close' : 'Menu';
+    burger.innerHTML = open ? BURGER.open : BURGER.shut;
     document.body.style.overflow = open ? 'hidden' : '';
   }
   if (burger && panel) {
@@ -169,30 +173,9 @@
     sections.forEach(function (s) { io.observe(s); });
   }
 
-  /* ---------------------------------------------------------- 3. reveals */
-  var reveals = $$('.reveal');
-  reveals.forEach(function (el) {
-    // cap the stagger at 6 steps — beyond that it reads as lag, not rhythm
-    var group = el.parentElement ? $$('.reveal', el.parentElement).indexOf(el) : 0;
-    el.style.setProperty('--i', String(Math.min(group < 0 ? 0 : group, 6)));
-  });
-  if (RM.matches || !('IntersectionObserver' in window)) {
-    // NEVER construct the observer under reduce — content would sit at
-    // opacity:0 forever for exactly the users who most need to read it.
-    reveals.forEach(function (el) { el.classList.add('in-view'); });
-  } else {
-    var rio = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        e.target.classList.add('in-view');
-        rio.unobserve(e.target);   // never re-animate on scroll-back
-      });
-    }, { threshold: .15, rootMargin: '0px 0px -10% 0px' });
-    reveals.forEach(function (el) { rio.observe(el); });
-  }
-
-  /* ---------------------------------------------------- 3b. hero + timeline
-     The hero copy cascades in on load; freeze the final state after so a later
+  /* ---------------------------------------------------- 3. hero + timeline
+     There are no scroll reveals: content is simply there. The only entrance
+     is the hero's, once, on load; freeze the final state after so a later
      language toggle (which swaps display:none nodes) can't replay it. */
   var heroSec = $('.hero');
   if (heroSec) setTimeout(function () { heroSec.classList.add('hero--shown'); }, 1200);
@@ -243,8 +226,7 @@
   /* Not particles.js: the dots are a FIXED lattice — nothing drifts, nothing
      floats, nothing autoplays. The only moving thing is the pointer's own k-NN
      ball, a labelled mathematical object with a defined radius. It appears
-     exactly once on the page. Pointer-driven, so it stays under reduced motion;
-     only the lattice parallax is disabled there. */
+     exactly once on the page. Pointer-driven, so it stays under reduced motion. */
   if (geo && knnG && HOVER.matches) {
     var VB = { w: 1440, h: 900 };
     var pts = latticePoints(VB.w, VB.h);
@@ -321,46 +303,15 @@
     return { start: start, stop: stop };
   });
 
-  /* --------------------------------------------- 5. hero parallax fallback */
-  /* Firefox has no scroll-driven CSS; without this it gets a dead hero. */
-  var supportsSDA = window.CSS && CSS.supports && CSS.supports('animation-timeline', 'scroll()');
-  var parallaxOn = false;
-  var pq = false;
-  function onScroll() {
-    if (pq) return;
-    pq = true;
-    requestAnimationFrame(function () {
-      pq = false;
-      var y = window.scrollY || window.pageYOffset || 0;
-      root.style.setProperty('--sy', String(y));
-      root.style.setProperty('--hero-o', String(Math.max(0, 1 - y / (0.6 * window.innerHeight))));
-    });
-  }
-  function startParallax() {
-    if (parallaxOn || supportsSDA || RM.matches) return;
-    parallaxOn = true;
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-  }
-  function stopParallax() {
-    if (!parallaxOn) return;
-    parallaxOn = false;
-    window.removeEventListener('scroll', onScroll);
-    root.style.removeProperty('--sy');
-    root.style.removeProperty('--hero-o');
-  }
-  startParallax();
+  /* ------------------------------------------- 5. live reduced-motion flip */
   // Honour a LIVE change, not just the state at load. Someone who starts to feel
   // unwell and flips the OS switch must have the motion stop NOW — including a
   // video that is already looping, which CSS cannot reach at all.
   RM.addEventListener('change', function (e) {
     if (e.matches) {
-      stopParallax();
-      reveals.forEach(function (el) { el.classList.add('in-view'); });
       vidCtl.forEach(function (c) { c.stop(); });
       if (simplex) simplex.stop();
     } else {
-      startParallax();
       vidCtl.forEach(function (c) { c.start(); });
       if (simplex) simplex.start();
     }
@@ -508,29 +459,6 @@
     }
     return { start: start, stop: stop };
   })();
-
-  /* ------------------------------ 6c. pointer depth on the Works cards
-     The plane tilts toward the cursor (≤ ~3.5°). The card's existing 220ms
-     ease-out transition is what makes it FLOW after the pointer rather than
-     snap. Hover-capable devices only; under reduced motion the vars are never
-     written, so the rotation stays zero. */
-  if (HOVER.matches) {
-    $$('.work').forEach(function (card) {
-      card.addEventListener('pointermove', function (ev) {
-        if (RM.matches) return;
-        var r = card.getBoundingClientRect();
-        if (!r.width || !r.height) return;
-        var px = (ev.clientX - r.left) / r.width - .5;
-        var py = (ev.clientY - r.top) / r.height - .5;
-        card.style.setProperty('--ry', (px * 5).toFixed(2) + 'deg');
-        card.style.setProperty('--rx', (py * -4).toFixed(2) + 'deg');
-      });
-      card.addEventListener('pointerleave', function () {
-        card.style.removeProperty('--ry');
-        card.style.removeProperty('--rx');
-      });
-    });
-  }
 
   /* --------------------------------------------------------- 7. back to top */
   var top = $('#to-top');

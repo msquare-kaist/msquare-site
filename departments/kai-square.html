@@ -47,14 +47,6 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
       <stop offset="0.55" stop-color="var(--mark-b)"/>
       <stop offset="1" stop-color="var(--mark-c)"/>
     </linearGradient>
-    <!-- the same mark tones, rotated one band along the curve. The hero M2
-         crossfades between #ink and #ink2 on the COMPOSITOR (opacity only) —
-         animating stop-color instead repaints the whole document every frame. -->
-    <linearGradient id="ink2" gradientUnits="userSpaceOnUse" x1="78" y1="1016" x2="1194" y2="297">
-      <stop offset="0" stop-color="var(--mark-b)"/>
-      <stop offset="0.55" stop-color="var(--mark-c)"/>
-      <stop offset="1" stop-color="var(--mark-a)"/>
-    </linearGradient>
     <!-- 36 x 36*sqrt(3) = a TRUE triangular lattice, not a square design grid -->
     <pattern id="lat" width="36" height="62.3538" patternUnits="userSpaceOnUse">
       <circle cx="0" cy="0" r="1.1" fill="var(--lattice)"/>
@@ -68,13 +60,13 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
 <header class="nav" id="nav">
   <div class="nav__in">
     <a class="nav__brand" href="../index.html" aria-label="MSquare 수학문제연구회">
-      <div class="m2" aria-hidden="true"><div class="m2__glow"><div class="m2__ink"><svg viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink)"/></svg><svg class="m2__flow" viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink2)"/></svg><div class="m2__spec"></div></div></div></div><span><span data-tr="ko" lang="ko">수학문제연구회</span><span data-tr="en" lang="en">MSquare</span></span>
+      <div class="m2" aria-hidden="true"><div class="m2__ink"><svg viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink)"/></svg></div></div><span><span data-tr="ko" lang="ko">수학문제연구회</span><span data-tr="en" lang="en">MSquare</span></span>
     </a>
-    <button class="nav__burger" id="nav-burger" aria-expanded="false" aria-controls="nav-nav">Menu</button>
+    <button class="nav__burger" id="nav-burger" aria-expanded="false" aria-controls="nav-nav"><span data-tr="ko" lang="ko">메뉴</span><span data-tr="en" lang="en">Menu</span></button>
     <div class="nav__nav" id="nav-nav">
       <nav aria-labelledby="nav-label">
         <span id="nav-label" class="vh"><span data-tr="ko" lang="ko">주요 메뉴</span><span data-tr="en" lang="en">Main menu</span></span>
-        <ul class="nav__list"><li><a class="nav__link mono" href="../index.html#about"><span data-tr="ko" lang="ko">소개</span><span data-tr="en" lang="en">About</span></a></li><li><a class="nav__link mono" href="../index.html#history"><span data-tr="ko" lang="ko">역사</span><span data-tr="en" lang="en">History</span></a></li><li><a class="nav__link mono" href="../index.html#activities"><span data-tr="ko" lang="ko">활동</span><span data-tr="en" lang="en">Activities</span></a></li><li><a class="nav__link mono" href="../index.html#works"><span data-tr="ko" lang="ko">발간</span><span data-tr="en" lang="en">Works</span></a></li><li><a class="nav__link mono" href="../index.html#departments"><span data-tr="ko" lang="ko">부서</span><span data-tr="en" lang="en">Departments</span></a></li><li><a class="nav__link mono" href="../index.html#clients"><span data-tr="ko" lang="ko">후원</span><span data-tr="en" lang="en">Partners</span></a></li><li><a class="nav__link mono" href="../index.html#contact"><span data-tr="ko" lang="ko">연락</span><span data-tr="en" lang="en">Contact</span></a></li>
+        <ul class="nav__list"><li><a class="nav__link" href="../index.html#about"><span data-tr="ko" lang="ko">소개</span><span data-tr="en" lang="en">About</span></a></li><li><a class="nav__link" href="../index.html#history"><span data-tr="ko" lang="ko">역사</span><span data-tr="en" lang="en">History</span></a></li><li><a class="nav__link" href="../index.html#activities"><span data-tr="ko" lang="ko">활동</span><span data-tr="en" lang="en">Activities</span></a></li><li><a class="nav__link" href="../index.html#works"><span data-tr="ko" lang="ko">발간</span><span data-tr="en" lang="en">Works</span></a></li><li><a class="nav__link" href="../index.html#departments"><span data-tr="ko" lang="ko">부서</span><span data-tr="en" lang="en">Departments</span></a></li><li><a class="nav__link" href="../index.html#clients"><span data-tr="ko" lang="ko">후원</span><span data-tr="en" lang="en">Partners</span></a></li><li><a class="nav__link" href="../index.html#contact"><span data-tr="ko" lang="ko">연락</span><span data-tr="en" lang="en">Contact</span></a></li>
           <li class="nav__mcta"><a class="nav__link" href="https://docs.google.com/forms/d/e/1FAIpQLSejRgH4z145met_fp1UhSyysGHc-GUjGMSzi1o0mNlst8scIA/viewform" target="_blank" rel="noopener noreferrer"><span data-tr="ko" lang="ko">ML 신청</span><span data-tr="en" lang="en">Subscribe · Math Letter</span> ↗</a></li>
           <li class="nav__mcta"><a class="nav__link" href="https://docs.google.com/forms/d/e/1FAIpQLSfa7r7LXsbyjGue4PvHQ596hR2btBNQPXVgmD-Yov7FL49fKw/viewform" target="_blank" rel="noopener noreferrer"><span data-tr="ko" lang="ko">KAI-Square 신청</span><span data-tr="en" lang="en">Subscribe · KAI-Square</span> ↗</a></li>
         </ul>
@@ -102,7 +94,6 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
 
 <main id="main">
   <section class="dhero">
-    <div class="aurora" aria-hidden="true"><i></i><i></i></div>
     <svg class="hero-geo" id="hero-geo" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
       <g class="hero-geo__field"><rect width="1440" height="900" fill="url(#lat)"/></g>
       <g class="hero-geo__knn"></g>
@@ -118,7 +109,7 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
   <section class="dbody">
     <div class="wrap">
       <div class="dgrid">
-        <div class="reveal">
+        <div>
           <!-- ============================================================
                아래 소개는 사이트에 이미 있는 사실만으로 쓴 초안입니다.
                부장님께서 확인하시고 자유롭게 고쳐주세요 (한국어/영어 두 문단 모두).
@@ -128,7 +119,7 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
           <p class="dintro" data-tr="ko" lang="ko">회지 카이스퀘어를 만드는 부서입니다. 글을 기획하고 편집해 발행하며, 2025년부터는 동아리 밖 독자에게도 전하고 있습니다.</p><p class="dintro" data-tr="en" lang="en">The team behind KAI-Square, our magazine. We plan, edit and publish each issue — and since 2025, we release it to readers outside the club.</p>
           <div class="actions"><a class="action" href="https://docs.google.com/forms/d/e/1FAIpQLSfa7r7LXsbyjGue4PvHQ596hR2btBNQPXVgmD-Yov7FL49fKw/viewform" target="_blank" rel="noopener noreferrer"><span class="mono mono--ko" data-tr="ko" lang="ko">KAI-Square 신청</span><span class="mono mono--ko" data-tr="en" lang="en">Subscribe to KAI-Square</span><span class="action__go mono">↗</span></a></div>
         </div>
-        <aside class="dside reveal">
+        <aside class="dside">
           <!-- Decorative, GIF-like: no caption, no controls, untouchable
                (pointer-events: none in CSS). Under reduced motion it never
                plays and the poster — the finished frame — stands in. -->
@@ -153,7 +144,7 @@ d.classList.add('js');d.classList.remove('no-js');})()</script>
 <footer class="foot">
   <div class="wrap foot__in">
     <div class="foot__brand">
-      <div class="m2" aria-hidden="true"><div class="m2__glow"><div class="m2__ink"><svg viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink)"/></svg><svg class="m2__flow" viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink2)"/></svg><div class="m2__spec"></div></div></div></div>
+      <div class="m2" aria-hidden="true"><div class="m2__ink"><svg viewBox="0 0 1395 1395" aria-hidden="true" focusable="false"><rect width="1395" height="1395" fill="url(#ink)"/></svg></div></div>
       <p class="foot__txt mono mono--ko" data-tr="any">© copyright MSquare · 최푸른하늘, 김강민</p>
     </div>
     <p class="foot__txt mono mono--ko" data-tr="ko" lang="ko">1988—2026 · 대전 KAIST</p><p class="foot__txt mono mono--ko" data-tr="en" lang="en">1988—2026 · KAIST, Daejeon</p>
